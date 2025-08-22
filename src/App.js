@@ -4,6 +4,7 @@ import HomePage from './components/HomePage';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/dashboard/Dashboard';
+import Gallery from './components/gallery/Gallery';
 import './App.css';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/gallery" element={<Gallery />} />
         </Routes>
       </div>
     </Router>
