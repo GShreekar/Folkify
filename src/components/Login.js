@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -16,7 +17,9 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Handle login logic here - for now just redirect to dashboard
     console.log('Login attempt:', formData);
+    navigate('/dashboard');
   };
 
   return (

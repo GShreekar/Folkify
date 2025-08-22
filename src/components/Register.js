@@ -5,8 +5,11 @@ const Register = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    governmentId: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
+    primaryArtForm: '',
     village: '',
     bio: ''
   });
@@ -104,6 +107,38 @@ const Register = () => {
           </div>
 
           <div>
+            <label htmlFor="governmentId" className="block text-sm font-medium text-amber-800 mb-2">
+              Government ID (Aadhar / PAN) *
+            </label>
+            <input
+              type="text"
+              id="governmentId"
+              name="governmentId"
+              value={formData.governmentId}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70 placeholder-amber-600/50"
+              placeholder="Enter Aadhar or PAN number"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-amber-800 mb-2">
+              Phone Number *
+            </label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70 placeholder-amber-600/50"
+              placeholder="Enter your phone number"
+              required
+            />
+          </div>
+
+          <div>
             <label htmlFor="password" className="block text-sm font-medium text-amber-800 mb-2">
               Password *
             </label>
@@ -139,6 +174,31 @@ const Register = () => {
             {errors.confirmPassword && (
               <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
             )}
+          </div>
+
+          <div>
+            <label htmlFor="primaryArtForm" className="block text-sm font-medium text-amber-800 mb-2">
+              Primary Art Form *
+            </label>
+            <select
+              id="primaryArtForm"
+              name="primaryArtForm"
+              value={formData.primaryArtForm}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70"
+              required
+            >
+              <option value="">Select your primary art form</option>
+              <option value="warli">Warli</option>
+              <option value="madhubani">Madhubani</option>
+              <option value="pithora">Pithora</option>
+              <option value="gond">Gond</option>
+              <option value="kalamkari">Kalamkari</option>
+              <option value="tanjore">Tanjore</option>
+              <option value="patachitra">Patachitra</option>
+              <option value="miniature">Miniature Painting</option>
+              <option value="other">Other</option>
+            </select>
           </div>
 
           <div>
