@@ -224,7 +224,7 @@ const MyArtworksSection = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-6 mb-8">
+    <div id="my-artworks-section" className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-6 mb-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-amber-800 mb-2">My Artworks</h2>

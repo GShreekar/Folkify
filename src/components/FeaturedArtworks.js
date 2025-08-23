@@ -337,7 +337,7 @@ const FeaturedArtworks = () => {
 
         <div className="text-center">
           <Link 
-            to="/explore"
+            to="/gallery"
             className="bg-white border-2 border-white text-red-700 px-8 py-4 rounded-full text-lg font-semibold hover:bg-yellow-300 hover:text-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl inline-block"
           >
             View All Artworks

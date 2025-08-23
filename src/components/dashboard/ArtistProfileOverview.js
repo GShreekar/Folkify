@@ -140,7 +140,7 @@ const ArtistProfileOverview = () => {
                   </div>
                   <div className="bg-red-50 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-red-800">
-                      {isVerified ? '✓' : (verificationProgress?.percentage || 0) + '%'}
+                      {isVerified ? '✓' : Math.round(verificationProgress?.percentage || 0) + '%'}
                     </div>
                     <div className="text-sm text-red-600">
                       {isVerified ? 'Verified' : 'Progress'}
@@ -163,7 +163,7 @@ const ArtistProfileOverview = () => {
                         className={`h-2 rounded-full transition-all duration-500 ${
                           verificationProgress.status === 'almost_there' ? 'bg-amber-500' : 'bg-amber-400'
                         }`}
-                        style={{ width: `${verificationProgress?.percentage || 0}%` }}
+                        style={{ width: `${Math.floor(verificationProgress?.percentage || 0)}%` }}
                       ></div>
                     </div>
                     <p className="text-xs text-amber-700">

@@ -1,23 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { getComplianceData } from '../../services/complianceService';
 
 const ExportComplianceCard = ({ artistData }) => {
-  // TODO: Load compliance data from Firebase/backend
-  const [complianceStatus, setComplianceStatus] = useState({
-    gstRegistered: false,
-    ecoFriendlyPackaging: false,
-    materialDisclosure: false,
-    hsCode: '',
-    artisanCertificate: false
-  });
+  const { currentUser } = useAuth();
+  const [complianceData, setComplianceData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate completion status
-  const completedItems = Object.values(complianceStatus).filter(value => 
-    typeof value === 'boolean' ? value : value.trim().length > 0
-  ).length;
-  const totalItems = Object.keys(complianceStatus).length;
-  const completionPercentage = Math.round((completedItems / totalItems) * 100);
-  const isExportReady = completedItems === totalItems;
+  // Define the 5 main compliance sections
+  const mainSections = [
+    { id: 'gstRegistered', label: 'GST Registration', icon: '📋' },
+    { id: 'ecoFriendlyPackaging', label: 'Eco-Friendly Packaging', icon: '🌱' },
+    { id: 'materialDisclosure', label: 'Material Disclosure', icon: '📝' },
+    { id: 'hsCode', label: 'HS Code', icon: '🏷️' },
+    { id: 'artisanCertificate', label: 'Artisan Certificate', icon: '🏆' }
+  ];
+
+  useEffect(() => {
+    const loadComplianceData = async () => {
+      if (currentUser?.uid) {
+        try {
+          const result = await getComplianceData(currentUser.uid);
+          if (result.success) {
+            setComplianceData(result.data);
+          }
+        } catch (error) {
+          console.error('Error loading compliance data:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    loadComplianceData();
+  }, [currentUser]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-6 mb-8">
+        <div className="animate-pulse">
+          <div className="h-6 bg-amber-200 rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-amber-100 rounded w-2/3 mb-6"></div>
+          <div className="h-3 bg-amber-100 rounded w-full"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate completion status for the 5 main sections
+  const getSectionCompletionStatus = (sectionId) => {
+    if (!complianceData) return false;
+    
+    const value = complianceData[sectionId];
+    if (typeof value === 'boolean') {
+      return value;
+    } else if (typeof value === 'string') {
+      return value && value.trim().length > 0;
+    } else if (Array.isArray(value)) {
+      return value && value.length > 0;
+    } else if (value && typeof value === 'object') {
+      return true;
+    }
+    return false;
+  };
+
+  const completedSections = mainSections.filter(section => 
+    getSectionCompletionStatus(section.id)
+  );
+  const completedCount = completedSections.length;
+  const totalCount = mainSections.length;
+  const completionPercentage = Math.round((completedCount / totalCount) * 100);
+  const isExportReady = completedCount === totalCount;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-6 mb-8">
@@ -27,7 +83,7 @@ const ExportComplianceCard = ({ artistData }) => {
           <p className="text-amber-700">
             {isExportReady
               ? "Your handicrafts meet global export standards and are ready for international markets!"
-              : "Complete your export checklist to enable international shipping"
+              : "Work on your export checklist at your own pace. Progress is saved automatically."
             }
           </p>
         </div>
@@ -50,7 +106,7 @@ const ExportComplianceCard = ({ artistData }) => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-amber-700">Progress</span>
-          <span className="text-sm font-medium text-amber-900">{completedItems}/{totalItems} Complete</span>
+          <span className="text-sm font-medium text-amber-900">{completedCount}/{totalCount} Complete</span>
         </div>
         <div className="w-full bg-amber-100 rounded-full h-3">
           <div 
@@ -66,70 +122,33 @@ const ExportComplianceCard = ({ artistData }) => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        <div className="text-center group relative">
-          <div className={`text-2xl mb-1 transition-all duration-200 ${complianceStatus.gstRegistered ? 'text-green-600' : 'text-gray-400'}`}>
-            📋 {complianceStatus.gstRegistered ? '✅' : '⭕'}
-          </div>
-          <div className="text-xs text-amber-700 font-medium">GST Registration</div>
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-            {complianceStatus.gstRegistered ? 'GST Registration Complete' : 'GST Registration Required'}
-          </div>
-        </div>
-
-        <div className="text-center group relative">
-          <div className={`text-2xl mb-1 transition-all duration-200 ${complianceStatus.ecoFriendlyPackaging ? 'text-green-600' : 'text-gray-400'}`}>
-            🌱 {complianceStatus.ecoFriendlyPackaging ? '✅' : '⭕'}
-          </div>
-          <div className="text-xs text-amber-700 font-medium">Eco Packaging</div>
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-            {complianceStatus.ecoFriendlyPackaging ? 'Eco-Friendly Packaging Confirmed' : 'Eco-Friendly Packaging Needed'}
-          </div>
-        </div>
-
-        <div className="text-center group relative">
-          <div className={`text-2xl mb-1 transition-all duration-200 ${complianceStatus.materialDisclosure ? 'text-green-600' : 'text-gray-400'}`}>
-            📝 {complianceStatus.materialDisclosure ? '✅' : '⭕'}
-          </div>
-          <div className="text-xs text-amber-700 font-medium">Materials</div>
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-            {complianceStatus.materialDisclosure ? 'Material Disclosure Complete' : 'Material Disclosure Required'}
-          </div>
-        </div>
-
-        <div className="text-center group relative">
-          <div className={`text-2xl mb-1 transition-all duration-200 ${complianceStatus.hsCode.trim().length > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-            🏷️ {complianceStatus.hsCode.trim().length > 0 ? '✅' : '⭕'}
-          </div>
-          <div className="text-xs text-amber-700 font-medium">HS Code</div>
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-            {complianceStatus.hsCode.trim().length > 0 ? `HS Code: ${complianceStatus.hsCode}` : 'HS Code Required'}
-          </div>
-        </div>
-
-        <div className="text-center group relative">
-          <div className={`text-2xl mb-1 transition-all duration-200 ${complianceStatus.artisanCertificate ? 'text-green-600' : 'text-gray-400'}`}>
-            🏆 {complianceStatus.artisanCertificate ? '✅' : '⭕'}
-          </div>
-          <div className="text-xs text-amber-700 font-medium">Certificate</div>
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-            {complianceStatus.artisanCertificate ? 'Artisan Certificate Complete' : 'Artisan Certificate Required'}
-          </div>
-        </div>
+        {mainSections.map(section => {
+          const isCompleted = getSectionCompletionStatus(section.id);
+          const value = complianceData?.[section.id];
+          
+          return (
+            <div key={section.id} className="text-center group relative">
+              <div className={`text-2xl mb-1 transition-all duration-200 ${isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
+                {section.icon} {isCompleted ? '✅' : '⭕'}
+              </div>
+              <div className="text-xs text-amber-700 font-medium">{section.label}</div>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                {isCompleted 
+                  ? `${section.label} Complete${typeof value === 'string' && value ? `: ${value}` : ''}` 
+                  : `${section.label} Required`
+                }
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3">
         <Link
-          to="/export-compliance"
-          className="flex-1 bg-gradient-to-r from-amber-600 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-center"
+          to="/compliance"
+          className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-center"
         >
-          📋 Complete Checklist
-        </Link>
-        
-        <Link
-          to="/export-demo"
-          className="flex-1 bg-amber-100 text-amber-800 px-6 py-3 rounded-xl font-semibold hover:bg-amber-200 transition-all duration-200 text-center"
-        >
-          🎯 View Demo
+          📋 Manage Compliance
         </Link>
       </div>
 
@@ -138,7 +157,7 @@ const ExportComplianceCard = ({ artistData }) => {
           <div className="flex items-start space-x-2">
             <div className="text-blue-500 text-sm">💡</div>
             <div className="text-blue-800 text-sm">
-              <strong>Next steps:</strong> Complete the remaining {totalItems - completedItems} requirement{totalItems - completedItems !== 1 ? 's' : ''} to enable international shipping for your artworks.
+              <strong>Progress update:</strong> {totalCount - completedCount} section{totalCount - completedCount !== 1 ? 's' : ''} remaining. Work at your own pace - you can submit for review anytime!
             </div>
           </div>
         </div>

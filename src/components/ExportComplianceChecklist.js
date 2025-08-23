@@ -1,61 +1,153 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { 
+  getComplianceData, 
+  updateComplianceData,
+  submitForReview 
+} from '../services/complianceService';
 
 const ExportComplianceChecklist = ({ initialData = null }) => {
-  // Default compliance data
+  const { currentUser } = useAuth();
+  
+  // Define default data structure
   const defaultData = {
     gstRegistered: false,
-    ecoFriendlyPackaging: false,
+    gstNumber: '',
+    gstCertificate: null,
     materialDisclosure: false,
+    materialsList: [],
+    materialCertificates: [],
     hsCode: '',
-    artisanCertificate: false
+    hsCodeVerified: false,
+    exportLicense: null,
+    qualityCertificate: null,
+    artisanCertificate: false,
+    artisanCertificateFile: null,
+    ecoFriendlyPackaging: false,
+    packagingDetails: '',
+    packagingCertificate: null,
+    fairTradeCertified: false,
+    fairTradeCertificate: null,
+    organicCertified: false,
+    organicCertificate: null
   };
 
-  const [complianceData, setComplianceData] = useState(
-    initialData || defaultData
-  );
+  const [complianceData, setComplianceData] = useState(defaultData);
 
-  const [isExportReady, setIsExportReady] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const {
-      gstRegistered,
-      ecoFriendlyPackaging,
-      materialDisclosure,
-      hsCode,
-      artisanCertificate
-    } = complianceData;
+    const loadComplianceData = async () => {
+      console.log('Loading compliance data for user:', currentUser?.uid); // Debug log
+      if (currentUser?.uid) {
+        try {
+          const result = await getComplianceData(currentUser.uid);
+          console.log('Loaded compliance data:', result); // Debug log
+          if (result.success) {
+            setComplianceData(result.data);
+          } else {
+            console.error('Failed to load compliance data:', result.error);
+          }
+        } catch (error) {
+          console.error('Error loading compliance data:', error);
+        }
+      } else {
+        console.log('No current user found'); // Debug log
+      }
+    };
 
-    const allFieldsComplete = 
-      gstRegistered &&
-      ecoFriendlyPackaging &&
-      materialDisclosure &&
-      hsCode.trim().length > 0 &&
-      artisanCertificate;
-
-    setIsExportReady(allFieldsComplete);
-  }, [complianceData]);
+    if (initialData) {
+      console.log('Using initial data:', initialData); // Debug log
+      setComplianceData(initialData);
+    } else {
+      loadComplianceData();
+    }
+  }, [currentUser, initialData]);
 
   const handleCheckboxChange = (field) => {
-    setComplianceData(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
+    const newValue = !complianceData[field];
+    const updatedData = {
+      ...complianceData,
+      [field]: newValue
+    };
+    
+    setComplianceData(updatedData);
   };
 
   const handleInputChange = (field, value) => {
-    setComplianceData(prev => ({
-      ...prev,
+    console.log('Input changed:', field, value); // Debug log
+    const updatedData = {
+      ...complianceData,
       [field]: value
-    }));
+    };
+    
+    setComplianceData(updatedData);
   };
 
-  const handleReset = () => {
-    setComplianceData(initialData || defaultData);
+  const handleSubmitForReview = async () => {
+    if (!currentUser?.uid) {
+      alert('Please log in to submit for review.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // First save current data, then submit for review
+      const saveResult = await updateComplianceData(currentUser.uid, complianceData);
+      if (!saveResult.success) {
+        alert('Failed to save data before submission: ' + (saveResult.error || 'Unknown error'));
+        return;
+      }
+
+      const result = await submitForReview(currentUser.uid);
+      if (result.success) {
+        alert('Compliance data submitted for review successfully!');
+        // Reload data to get updated status
+        const updatedResult = await getComplianceData(currentUser.uid);
+        if (updatedResult.success) {
+          setComplianceData(updatedResult.data);
+        }
+      } else {
+        alert('Submission failed: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Submission failed: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleSave = () => {
-    console.log('Saving compliance data:', complianceData);
-    alert('Export compliance checklist saved successfully!');
+  const handleSave = async () => {
+    if (!currentUser?.uid) {
+      alert('Please log in to save your progress.');
+      return;
+    }
+    
+    console.log('Manual save triggered, current data:', complianceData); // Debug log
+    setSaving(true);
+    try {
+      const result = await updateComplianceData(currentUser.uid, complianceData);
+      console.log('Manual save result:', result); // Debug log
+      if (result.success) {
+        alert('Progress saved successfully!');
+      } else {
+        alert('Failed to save progress: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Failed to save progress: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const getSectionStatus = (itemId) => {
+    const value = complianceData[itemId];
+    if (typeof value === 'boolean') {
+      return value ? 'complete' : 'incomplete';
+    }
+    return (value && value.toString().trim().length > 0) ? 'complete' : 'incomplete';
   };
 
   const complianceItems = [
@@ -102,6 +194,20 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
     }
   ];
 
+  const completedCount = complianceItems.filter(item => getSectionStatus(item.id) === 'complete').length;
+
+  // Show loading or auth message if needed
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-bold text-amber-900 mb-4">Please Log In</h1>
+          <p className="text-amber-700">You need to be logged in to access the compliance checklist.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-8">
       <div className="max-w-4xl mx-auto">
@@ -117,26 +223,18 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-amber-900 mb-2">Export Status</h2>
+              <h2 className="text-2xl font-bold text-amber-900 mb-2">Compliance Progress</h2>
               <p className="text-amber-700">
-                {isExportReady
-                  ? "This badge confirms your product meets minimum global export standards. It reassures buyers that your handicrafts are compliant, authentic, and safe for international markets."
-                  : "Complete all requirements to enable international shipping"
-                }
+                Complete each section at your own pace. Your progress is automatically saved.
               </p>
             </div>
             <div className="text-right">
-              {isExportReady ? (
-                <div className="inline-flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full">
-                  <span className="text-2xl">✅</span>
-                  <span className="font-bold text-lg">Export Ready</span>
-                </div>
-              ) : (
-                <div className="inline-flex items-center space-x-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full">
-                  <span className="text-2xl">⏳</span>
-                  <span className="font-bold text-lg">Pending Compliance</span>
-                </div>
-              )}
+              <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
+                <span className="text-2xl">📊</span>
+                <span className="font-bold text-lg">
+                  {Math.round((completedCount / complianceItems.length) * 100)}% Complete
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -149,8 +247,12 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
               <div key={item.id} className="bg-amber-50 rounded-xl p-6 border border-amber-200">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl shadow-sm border border-amber-200">
-                      {item.icon}
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm border-2 ${
+                      getSectionStatus(item.id) === 'complete' 
+                        ? 'bg-green-100 border-green-500 text-green-600' 
+                        : 'bg-white border-amber-200 text-amber-600'
+                    }`}>
+                      {getSectionStatus(item.id) === 'complete' ? '✅' : item.icon}
                     </div>
                   </div>
 
@@ -179,16 +281,13 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
                       {item.required && (
                         <span className="text-red-500 text-sm font-medium">*Required</span>
                       )}
-                      {item.type === 'checkbox' && complianceData[item.id] && (
-                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                          ✅ Complete
-                        </span>
-                      )}
-                      {item.type === 'text' && complianceData[item.id].trim().length > 0 && (
-                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                          ✅ Complete
-                        </span>
-                      )}
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        getSectionStatus(item.id) === 'complete'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {getSectionStatus(item.id) === 'complete' ? '✅ Complete' : '⏳ Pending'}
+                      </span>
                     </div>
 
                     <p className="text-amber-800 text-sm leading-relaxed mb-4 bg-white p-4 rounded-lg border border-amber-200">
@@ -207,7 +306,7 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
                           placeholder={item.placeholder}
                           className="w-full px-4 py-3 rounded-xl border-2 border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-200 bg-white"
                         />
-                        {complianceData[item.id].trim().length > 0 && (
+                        {complianceData[item.id] && complianceData[item.id].trim().length > 0 && (
                           <p className="text-green-600 text-sm mt-2 flex items-center">
                             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -229,49 +328,69 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-amber-900">
-                {Object.values(complianceData).filter(value => 
-                  typeof value === 'boolean' ? value : value.trim().length > 0
-                ).length}
+              <div className="text-3xl font-bold text-green-600">
+                {completedCount}
               </div>
               <div className="text-amber-600">Completed</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-amber-900">
-                {complianceItems.length}
+                {complianceItems.length - completedCount}
               </div>
-              <div className="text-amber-600">Total Items</div>
+              <div className="text-amber-600">Remaining</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                {Math.round((Object.values(complianceData).filter(value => 
-                  typeof value === 'boolean' ? value : value.trim().length > 0
-                ).length / complianceItems.length) * 100)}%
+              <div className="text-3xl font-bold text-blue-600">
+                {Math.round((completedCount / complianceItems.length) * 100)}%
               </div>
-              <div className="text-amber-600">Complete</div>
+              <div className="text-amber-600">Progress</div>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            onClick={handleSave}
-            disabled={!isExportReady}
-            className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 ${
-              isExportReady
-                ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 transform hover:scale-105 shadow-lg'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {isExportReady ? '✅ Save & Enable Export' : '⏳ Complete All Requirements'}
-          </button>
+        <div className="flex flex-col gap-4 justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className={`px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-200 ${
+                saving
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 shadow-lg'
+              }`}
+            >
+              {saving ? '💾 Saving...' : '💾 Save Progress'}
+            </button>
+            
+            <button
+              onClick={handleSubmitForReview}
+              disabled={saving}
+              className={`px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-200 ${
+                completedCount > 0
+                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 transform hover:scale-105 shadow-lg'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              title={completedCount === 0 ? 'Complete at least one section to submit' : ''}
+            >
+              {saving ? '📤 Submitting...' : '📤 Submit for Review'}
+            </button>
+          </div>
           
-          <button
-            onClick={handleReset}
-            className="px-8 py-4 rounded-xl font-semibold text-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all duration-200"
-          >
-            🔄 Reset Checklist
-          </button>
+          <div className="text-center">
+            <p className="text-amber-700 text-sm mb-2">
+              💡 <strong>Tip:</strong> You can complete sections in any order. Progress is saved automatically.
+            </p>
+            {completedCount < complianceItems.length && (
+              <p className="text-blue-700 text-sm">
+                📈 {complianceItems.length - completedCount} sections remaining to achieve full compliance
+              </p>
+            )}
+            {completedCount === complianceItems.length && (
+              <p className="text-green-700 text-sm font-semibold">
+                🎉 Congratulations! All compliance requirements completed!
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 mt-8 border border-blue-200">
@@ -334,10 +453,10 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
             <div className="bg-white rounded-xl p-6 border border-blue-200">
               <div className="flex items-center mb-3">
                 <span className="text-2xl mr-3">✅</span>
-                <h4 className="font-bold text-blue-900">Export Ready Badge</h4>
+                <h4 className="font-bold text-blue-900">Progress Tracking</h4>
               </div>
               <p className="text-blue-800 text-sm leading-relaxed">
-                This badge confirms your product meets minimum global export standards. It reassures buyers that your handicrafts are compliant, authentic, and safe for international markets.
+                Your compliance progress is automatically saved as you complete each section. You can work on different requirements at your own pace without losing any data.
               </p>
             </div>
           </div>

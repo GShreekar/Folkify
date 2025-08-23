@@ -13,11 +13,9 @@ const MeetTheArtists = () => {
 
   useEffect(() => {
     fetchArtists();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatArtistData = (user) => {
-    // Map the raw user data to the format expected by the UI
     return {
       id: user.id,
       displayName: user.displayName || user.firstName || user.name || user.email?.split('@')[0] || 'Artist',
@@ -30,9 +28,9 @@ const MeetTheArtists = () => {
       primaryArtForm: user.primaryArtForm || user.specialization || user.artForm,
       bio: user.bio || user.description || user.about || `Passionate ${user.specialization || 'folk'} artist`,
       artworkCount: user.artworkCount || 0,
-      experienceYears: user.experienceYears || user.experience || Math.floor(Math.random() * 15) + 5, // Default random experience
+      experienceYears: user.experienceYears || user.experience || Math.floor(Math.random() * 15) + 5,
       isVerified: user.isVerified || false,
-      isActive: user.isActive !== false, // Default to true unless explicitly false
+      isActive: user.isActive !== false,
       userType: user.userType || 'artist'
     };
   };
@@ -40,33 +38,21 @@ const MeetTheArtists = () => {
   const fetchArtists = async () => {
     setError(null);
     try {
-      // Get all users without any filtering first
       const allUsersResult = await getAllArtists({
         limitCount: 20,
         includeArtworkCount: true
       });
       
       if (allUsersResult.success) {
-        console.log('Found', allUsersResult.artists.length, 'users in database');
-        
         if (allUsersResult.artists.length > 0) {
-          // Format the user data for proper display
           const formattedArtists = allUsersResult.artists.map(formatArtistData);
-          
-          // Take the first 6 formatted artists
           const artistsToShow = formattedArtists.slice(0, 6);
-          
-          console.log('Displaying', artistsToShow.length, 'artists');
           setArtists(artistsToShow);
-        } else {
-          console.log('No users found in database');
         }
       } else {
-        console.error('Failed to fetch users:', allUsersResult.error);
         setError(allUsersResult.error || 'Failed to load artists');
       }
     } catch (error) {
-      console.error('Error in fetchArtists:', error);
       setError(`Unable to load artists: ${error.message}`);
     } finally {
       setLoading(false);
@@ -75,7 +61,6 @@ const MeetTheArtists = () => {
 
   return (
     <section id="artists" className="py-16 folk-art-background">
-      {/* Enhanced Mandala Patterns */}
       <div className="mandala-pattern mandala-1"></div>
       <div className="mandala-pattern mandala-2"></div>
       <div className="mandala-complex complex-1">
@@ -85,7 +70,6 @@ const MeetTheArtists = () => {
         <div className="mandala-petals"></div>
       </div>
       
-      {/* Warli Art Elements */}
       <div className="warli-figure warli-1">
         <div className="warli-arms"></div>
         <div className="warli-legs"></div>
@@ -99,7 +83,6 @@ const MeetTheArtists = () => {
         <div className="warli-legs"></div>
       </div>
       
-      {/* Warli Trees */}
       <div className="warli-tree tree-1">
         <div className="warli-tree-branches"></div>
       </div>
@@ -110,7 +93,6 @@ const MeetTheArtists = () => {
         <div className="warli-tree-branches"></div>
       </div>
       
-      {/* Warli Peacocks */}
       <div className="warli-peacock peacock-1">
         <div className="peacock-tail"></div>
       </div>
@@ -118,7 +100,6 @@ const MeetTheArtists = () => {
         <div className="peacock-tail"></div>
       </div>
       
-      {/* Warli Celebration Circles */}
       <div className="warli-celebration celebration-1">
         <div className="celebration-figure fig-1">
           <div className="celebration-arms"></div>
@@ -146,24 +127,19 @@ const MeetTheArtists = () => {
         </div>
       </div>
       
-      {/* Tribal Patterns */}
       <div className="tribal-pattern tribal-1"></div>
       <div className="tribal-pattern tribal-2"></div>
       <div className="tribal-pattern tribal-3"></div>
       
-      {/* Geometric Patterns */}
       <div className="geometric-pattern geo-1"></div>
       <div className="geometric-pattern geo-2"></div>
       
-      {/* Content with overlay */}
       <div className="folk-content-overlay mx-auto">
-        {/* Warli corner decorations */}
         <div className="warli-corner-decoration warli-corner-tl"></div>
         <div className="warli-corner-decoration warli-corner-tr"></div>
         <div className="warli-corner-decoration warli-corner-bl"></div>
         <div className="warli-corner-decoration warli-corner-br"></div>
         
-        {/* Side patterns */}
         <div className="warli-side-pattern"></div>
         <div className="warli-side-pattern warli-side-pattern-right"></div>
         

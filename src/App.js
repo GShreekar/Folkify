@@ -12,7 +12,7 @@ import ArtistProfile from './components/ArtistProfile';
 import ArtworkDetail from './components/ArtworkDetail';
 import BadgeSystem from './components/BadgeSystem';
 import ExportComplianceChecklist from './components/ExportComplianceChecklist';
-import ExportComplianceDemo from './components/ExportComplianceDemo';
+import ComplianceForm from './components/ComplianceForm';
 import './App.css';
 
 function App() {
@@ -51,7 +51,14 @@ function App() {
             <Route path="/artwork/:artworkId" element={<ArtworkDetail />} />
             <Route path="/badge-system" element={<BadgeSystem />} />
             <Route path="/export-compliance" element={<ExportComplianceChecklist />} />
-            <Route path="/export-demo" element={<ExportComplianceDemo />} />
+            <Route 
+              path="/compliance" 
+              element={
+                <ProtectedRoute>
+                  <ComplianceForm />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </div>
       </Router>
