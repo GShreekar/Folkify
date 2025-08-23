@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser, getCurrentUserData } from '../firebase/auth';
+import { useAuth } from '../contexts/AuthContext';
 import './FolkArtAnimations.css';
 
 const UserLogin = () => {
@@ -10,7 +11,24 @@ const UserLogin = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(null);
   const navigate = useNavigate();
+  const { currentUser, userData } = useAuth();
+
+  // Handle redirect after authentication state is updated
+  useEffect(() => {
+    if (shouldRedirect && currentUser && userData) {
+      const userRole = userData.role;
+      
+      // Redirect based on role
+      if (userRole === 'artist') {
+        navigate('/dashboard');
+      } else {
+        navigate('/');
+      }
+      setShouldRedirect(null);
+    }
+  }, [currentUser, userData, shouldRedirect, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -34,21 +52,8 @@ const UserLogin = () => {
       const result = await loginUser(formData.email, formData.password);
       
       if (result.success) {
-        // Get user data to check role
-        const userDataResult = await getCurrentUserData(result.user.uid);
-        
-        if (userDataResult.success) {
-          const userRole = userDataResult.userData.role;
-          
-          // Redirect based on role
-          if (userRole === 'artist') {
-            navigate('/dashboard');
-          } else {
-            navigate('/');
-          }
-        } else {
-          navigate('/');
-        }
+        // Set flag to redirect once AuthContext updates
+        setShouldRedirect(true);
       } else {
         setErrors({ submit: result.error });
       }

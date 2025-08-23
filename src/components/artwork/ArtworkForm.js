@@ -405,9 +405,14 @@ const ArtworkForm = ({
                   className="w-full px-4 py-4 border-2 border-amber-200 rounded-xl focus:ring-3 focus:ring-amber-500/30 focus:border-amber-500 bg-amber-50/50 text-lg font-medium transition-all duration-200"
                 >
                   <option value="" className="text-amber-600">Choose your art form...</option>
-                  {ART_FORMS.map((form) => (
-                    <option key={form.id} value={form.id} className="text-amber-800">
-                      {form.name}
+                  {ART_FORMS.map((form, index) => (
+                    <option 
+                      key={form.value || index} 
+                      value={form.value} 
+                      className="text-amber-800"
+                      disabled={form.disabled}
+                    >
+                      {form.label}
                     </option>
                   ))}
                 </select>
