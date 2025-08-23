@@ -10,15 +10,12 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
     artisanCertificate: false
   };
 
-  // Local state for compliance fields
   const [complianceData, setComplianceData] = useState(
     initialData || defaultData
   );
 
-  // Computed state for export readiness
   const [isExportReady, setIsExportReady] = useState(false);
 
-  // Check if all required fields are complete
   useEffect(() => {
     const {
       gstRegistered,
@@ -38,7 +35,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
     setIsExportReady(allFieldsComplete);
   }, [complianceData]);
 
-  // Handle checkbox changes
   const handleCheckboxChange = (field) => {
     setComplianceData(prev => ({
       ...prev,
@@ -46,7 +42,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
     }));
   };
 
-  // Handle text input changes
   const handleInputChange = (field, value) => {
     setComplianceData(prev => ({
       ...prev,
@@ -54,18 +49,15 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
     }));
   };
 
-  // Reset all fields
   const handleReset = () => {
     setComplianceData(initialData || defaultData);
   };
 
-  // Mock save function
   const handleSave = () => {
     console.log('Saving compliance data:', complianceData);
     alert('Export compliance checklist saved successfully!');
   };
 
-  // Compliance items configuration with detailed explanations
   const complianceItems = [
     {
       id: 'gstRegistered',
@@ -113,7 +105,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-amber-900 mb-4">
             Export Compliance Checklist
@@ -123,7 +114,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
           </p>
         </div>
 
-        {/* Export Ready Status */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="flex items-center justify-between">
             <div>
@@ -151,7 +141,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
           </div>
         </div>
 
-        {/* Compliance Checklist */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <h3 className="text-xl font-bold text-amber-900 mb-6">Compliance Requirements</h3>
           
@@ -159,14 +148,12 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
             {complianceItems.map((item) => (
               <div key={item.id} className="bg-amber-50 rounded-xl p-6 border border-amber-200">
                 <div className="flex items-start space-x-4">
-                  {/* Icon */}
                   <div className="flex-shrink-0">
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl shadow-sm border border-amber-200">
                       {item.icon}
                     </div>
                   </div>
 
-                  {/* Checkbox for checkbox items */}
                   {item.type === 'checkbox' && (
                     <div className="flex-shrink-0 mt-3">
                       <button
@@ -237,7 +224,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
           </div>
         </div>
 
-        {/* Progress Summary */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <h3 className="text-xl font-bold text-amber-900 mb-4">Progress Summary</h3>
           
@@ -267,7 +253,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={handleSave}
@@ -289,7 +274,6 @@ const ExportComplianceChecklist = ({ initialData = null }) => {
           </button>
         </div>
 
-        {/* Help Section */}
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 mt-8 border border-blue-200">
           <div className="flex items-center mb-6">
             <div className="text-3xl mr-3">💡</div>

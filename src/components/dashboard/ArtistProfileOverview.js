@@ -1,8 +1,8 @@
 import React from 'react';
 import VerifiedArtistBadge from '../VerifiedArtistBadge';
+import { getVerificationProgress } from '../../services/badgeService';
 
 const ArtistProfileOverview = ({ artistData }) => {
-  // artistData will be fetched from database
   const {
     name = 'Artist Name',
     bio = 'Bio will be loaded from database...',
@@ -12,6 +12,8 @@ const ArtistProfileOverview = ({ artistData }) => {
     isVerified = false,
     artworkCount = 0
   } = artistData || {};
+
+  const verificationProgress = getVerificationProgress({ artworkCount });
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-6 mb-8">
@@ -42,9 +44,33 @@ const ArtistProfileOverview = ({ artistData }) => {
                 <span className="text-amber-700 font-medium">{region}</span>
               </div>
 
-              <p className="text-amber-600 leading-relaxed max-w-2xl">
+              <p className="text-amber-600 leading-relaxed max-w-2xl mb-4">
                 {bio}
               </p>
+
+              {!isVerified && verificationProgress.remaining > 0 && (
+                <div className="bg-amber-50 rounded-lg p-4 mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-amber-900">
+                      Verification Progress
+                    </span>
+                    <span className="text-xs text-amber-700">
+                      {verificationProgress.current}/{verificationProgress.target} artworks
+                    </span>
+                  </div>
+                  <div className="w-full bg-amber-200 rounded-full h-2 mb-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        verificationProgress.status === 'almost_there' ? 'bg-amber-500' : 'bg-amber-400'
+                      }`}
+                      style={{ width: `${verificationProgress.percentage}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-amber-700">
+                    Upload {verificationProgress.remaining} more artwork{verificationProgress.remaining !== 1 ? 's' : ''} to become a Verified Artist! 🎨
+                  </p>
+                </div>
+              )}
             </div>
 
             <button className="bg-amber-100 hover:bg-amber-200 text-amber-800 p-2 rounded-lg transition-colors duration-200">

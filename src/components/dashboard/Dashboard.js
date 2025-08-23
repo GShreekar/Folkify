@@ -5,24 +5,21 @@ import ArtistProfileOverview from './ArtistProfileOverview';
 import MyArtworksSection from './MyArtworksSection';
 import ExportComplianceCard from './ExportComplianceCard';
 import DashboardFooter from './DashboardFooter';
-import mockDB from '../../services/mockDatabaseService';
 
 const Dashboard = () => {
-  // State for artist data and artworks
   const [artistData, setArtistData] = useState(null);
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load initial data (simulating current logged-in artist)
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // For demo purposes, load the first artist (Jangarh Singh Shyam)
-        const artist = await mockDB.getArtist(1);
-        const artistArtworks = await mockDB.getArtworksByArtist(1);
-
-        setArtistData(artist);
-        setArtworks(artistArtworks);
+        // TODO: Replace with Firebase/backend API call
+        // Load current logged-in artist data from database
+        
+        // For now, set empty data - to be replaced with real data from Firebase
+        setArtistData(null);
+        setArtworks([]);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       } finally {
@@ -33,7 +30,6 @@ const Dashboard = () => {
     loadDashboardData();
   }, []);
 
-  // Handle artist data updates (e.g., after verification status change)
   const handleArtistUpdate = (updatedArtist) => {
     setArtistData(updatedArtist);
   };

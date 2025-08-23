@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import mockDB from '../../services/mockDatabaseService';
+import { processArtworkUpload } from '../../services/badgeService';
+import BadgeNotification from '../BadgeNotification';
 
 const MyArtworksSection = ({ artworks = [], artistData, onArtistUpdate }) => {
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [notification, setNotification] = useState(null);
   const [uploadFormData, setUploadFormData] = useState({
     title: '',
     description: '',
@@ -36,33 +38,34 @@ const MyArtworksSection = ({ artworks = [], artistData, onArtistUpdate }) => {
     e.preventDefault();
 
     try {
-      // Simulate artwork upload with artist data
+      // TODO: Replace with Firebase/backend API call
       const artworkData = {
         ...uploadFormData,
-        artistId: artistData?.id || 1, // Default to artist ID 1 for demo
+        id: Date.now(),
+        artistId: artistData?.id || 1,
         artist: artistData?.name || 'Current Artist',
-        region: artistData?.region || 'Unknown Region'
+        region: artistData?.region || 'Unknown Region',
+        status: 'approved',
+        uploadDate: new Date().toISOString()
       };
 
       console.log('Uploading artwork:', artworkData);
-
-      // Add artwork and check verification status
-      const result = await mockDB.addArtwork(artworkData);
-
-      if (result.verificationChanged) {
-        console.log(`🎉 Artist verification status changed! Now verified: ${result.artist.isVerified}`);
-
-        // Show notification about verification status change
-        if (result.artist.isVerified) {
-          alert('🎉 Congratulations! You are now a Verified Artist with 3+ artworks!');
+      
+      const updatedArtworks = [...artworks, artworkData];
+      
+      if (artistData && onArtistUpdate) {
+        const result = processArtworkUpload(artistData, updatedArtworks);
+        
+        if (result.verificationChanged) {
+          onArtistUpdate(result.updatedArtist);
         }
-
-        // Update parent component with new artist data
-        if (onArtistUpdate) {
-          onArtistUpdate(result.artist);
+        
+        if (result.notification) {
+          setNotification(result.notification);
         }
       }
 
+      
       setShowUploadForm(false);
       setUploadFormData({
         title: '',
@@ -74,12 +77,22 @@ const MyArtworksSection = ({ artworks = [], artistData, onArtistUpdate }) => {
 
     } catch (error) {
       console.error('Error uploading artwork:', error);
-      alert('Error uploading artwork. Please try again.');
+      setNotification({
+        type: 'error',
+        title: 'Upload Failed',
+        message: 'Error uploading artwork. Please try again.',
+        duration: 4000
+      });
     }
   };
 
   return (
     <div className="mb-8">
+      <BadgeNotification 
+        notification={notification} 
+        onClose={() => setNotification(null)} 
+      />
+      
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-amber-900">My Artworks</h2>
         <button

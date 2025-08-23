@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const ExportComplianceCard = ({ artistData }) => {
-  // Mock compliance data for the artist
+  // TODO: Load compliance data from Firebase/backend
   const [complianceStatus, setComplianceStatus] = useState({
-    gstRegistered: true,
+    gstRegistered: false,
     ecoFriendlyPackaging: false,
-    materialDisclosure: true,
-    hsCode: '9701.10',
+    materialDisclosure: false,
+    hsCode: '',
     artisanCertificate: false
   });
 
@@ -47,7 +47,6 @@ const ExportComplianceCard = ({ artistData }) => {
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-amber-700">Progress</span>
@@ -66,7 +65,6 @@ const ExportComplianceCard = ({ artistData }) => {
         </div>
       </div>
 
-      {/* Quick Status Overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <div className="text-center group relative">
           <div className={`text-2xl mb-1 transition-all duration-200 ${complianceStatus.gstRegistered ? 'text-green-600' : 'text-gray-400'}`}>
@@ -119,7 +117,6 @@ const ExportComplianceCard = ({ artistData }) => {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Link
           to="/export-compliance"
@@ -136,7 +133,6 @@ const ExportComplianceCard = ({ artistData }) => {
         </Link>
       </div>
 
-      {/* Help Text */}
       {!isExportReady && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start space-x-2">

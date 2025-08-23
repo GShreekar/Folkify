@@ -1,9 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import VerifiedArtistBadge from './VerifiedArtistBadge';
-import { mockArtists } from '../data/mockData';
 
 const MeetTheArtists = () => {
-  const artists = mockArtists;
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // TODO: Implement Firebase data fetching
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        
+        setArtists([]);
+      } catch (error) {
+        console.error('Error fetching artists:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArtists();
+  }, []);
 
   const getSpecialtyColor = (specialty) => {
     if (specialty.includes('Warli')) return 'text-amber-700 bg-amber-100';
@@ -26,7 +42,13 @@ const MeetTheArtists = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-amber-600 to-red-600 mx-auto mt-6 rounded-full"></div>
         </div>
 
-        {artists.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-16 mb-12">
+            <div className="w-12 h-12 bg-amber-200 rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-amber-900 mb-2">Loading Artists...</h3>
+            <p className="text-amber-700">Discovering talented folk artists from across India</p>
+          </div>
+        ) : artists.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {artists.map((artist) => (
               <div 

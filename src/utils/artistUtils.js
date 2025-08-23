@@ -1,5 +1,3 @@
-// Artist data management utilities
-
 /**
  * Check if an artist should be verified based on artwork count
  * @param {number} artworkCount - Number of artworks uploaded by the artist
@@ -60,49 +58,6 @@ export const updateAllArtistsVerification = (artists, artworks) => {
 };
 
 /**
- * Mock database operations for artist verification
+ * TODO: Replace with Firebase/backend database operations for artist verification
+ * This will be implemented when connecting to the actual backend
  */
-export const mockArtistDatabase = {
-  /**
-   * Simulate updating artist verification in database
-   * @param {string} artistId - Artist ID
-   * @param {boolean} isVerified - Verification status
-   * @param {number} artworkCount - Current artwork count
-   * @returns {Promise} - Simulated database response
-   */
-  updateVerification: async (artistId, isVerified, artworkCount) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    console.log(`[Mock DB] Updated artist ${artistId}: verified=${isVerified}, artworks=${artworkCount}`);
-    
-    return {
-      success: true,
-      artistId,
-      isVerified,
-      artworkCount,
-      updatedAt: new Date().toISOString()
-    };
-  },
-
-  /**
-   * Simulate fetching artist data from database
-   * @param {string} artistId - Artist ID
-   * @returns {Promise} - Simulated artist data
-   */
-  getArtist: async (artistId) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    // Return mock artist data
-    return {
-      id: artistId,
-      name: 'Mock Artist',
-      isVerified: false,
-      artworkCount: 0,
-      bio: 'Mock artist bio',
-      region: 'Mock Region',
-      artform: 'Mock Art Form'
-    };
-  }
-};

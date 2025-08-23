@@ -1,14 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import VerifiedArtistBadge from '../VerifiedArtistBadge';
-import { mockArtworks, mockArtists } from '../../data/mockData';
 
 const GalleryArtworksGrid = ({ filters }) => {
-  // Use mock data for artworks and artists
-  const [artworks, setArtworks] = useState(mockArtworks);
-  const [artists, setArtists] = useState(mockArtists);
+  const [artworks, setArtworks] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Helper function to get artist data by name
+  // TODO: Implement Firebase data fetching
+  useEffect(() => {
+    const fetchArtworksAndArtists = async () => {
+      try {
+        // TODO: Replace with actual Firebase calls
+        
+        setArtworks([]);
+        setArtists([]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArtworksAndArtists();
+  }, []);
+
   const getArtistByName = (artistName) => {
     return artists.find(artist => artist.name === artistName);
   };
@@ -17,21 +33,18 @@ const GalleryArtworksGrid = ({ filters }) => {
   const getFilteredArtworks = () => {
     let filtered = artworks;
 
-    // Filter by art form
     if (filters?.artform && filters.artform !== 'all') {
       filtered = filtered.filter(artwork => 
         artwork.artform.toLowerCase() === filters.artform.toLowerCase()
       );
     }
 
-    // Filter by region
     if (filters?.region && filters.region !== 'all') {
       filtered = filtered.filter(artwork => 
         artwork.region.toLowerCase().replace(/\s+/g, '-') === filters.region
       );
     }
 
-    // Filter by search term
     if (filters?.search && filters.search.trim()) {
       const searchTerm = filters.search.toLowerCase();
       filtered = filtered.filter(artwork => 
@@ -66,6 +79,20 @@ const GalleryArtworksGrid = ({ filters }) => {
   };
 
   const filteredArtworks = getFilteredArtworks();
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-16">
+            <div className="w-12 h-12 bg-amber-200 rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-amber-900 mb-2">Loading Artworks...</h3>
+            <p className="text-amber-700">Fetching beautiful artworks from our artists</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const getArtformColor = (artform) => {
     const colors = {

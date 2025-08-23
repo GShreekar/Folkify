@@ -105,7 +105,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="h-2 bg-gradient-to-r from-amber-500 via-red-500 via-orange-500 to-amber-500"></div>
+      <div className="h-2 bg-gradient-to-r from-amber-500 via-red-500 to-amber-500"></div>
     </footer>
   );
 };
