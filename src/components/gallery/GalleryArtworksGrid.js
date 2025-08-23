@@ -1,117 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllArtworks, getAllArtists } from '../../services/artworkService';
-import VerifiedArtistBadge from '../VerifiedArtistBadge';
-import ArtworkModal from '../artwork/ArtworkModal';
+import { getAllArtworks } from '../../services/artworkService';
+import LoadingSkeleton from '../LoadingSkeleton';
+import LazyImage from '../LazyImage';
+import { getArtFormColor } from '../../constants/artForms';
 
 const GalleryArtworksGrid = ({ filters }) => {
   const [artworks, setArtworks] = useState([]);
-  const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [error, setError] = useState(null);
+
+  const sortOptions = [
+    { id: 'newest', name: 'Newest First', field: 'createdAt', direction: 'desc' },
+    { id: 'oldest', name: 'Oldest First', field: 'createdAt', direction: 'asc' },
+    { id: 'price-low-high', name: 'Price: Low to High', field: 'price', direction: 'asc' },
+    { id: 'price-high-low', name: 'Price: High to Low', field: 'price', direction: 'desc' },
+    { id: 'popular', name: 'Most Popular', field: 'views', direction: 'desc' }
+  ];
 
   useEffect(() => {
-    const fetchArtworksAndArtists = async () => {
-      try {
-        const [artworkData, artistData] = await Promise.all([
-          getAllArtworks(),
-          getAllArtists()
-        ]);
+    fetchArtworks();
+  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchArtworks = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const sortOption = sortOptions.find(option => option.id === filters?.sort) || sortOptions[0];
+      const options = {
+        limitCount: 100,
+        orderField: sortOption.field,
+        orderDirection: sortOption.direction
+      };
+
+      if (filters?.artform && filters.artform !== 'all') {
+        options.artForm = filters.artform;
+      }
+
+      const result = await getAllArtworks(options);
+      if (result.success) {
+        let filteredArtworks = result.artworks;
         
-        setArtworks(artworkData);
-        setArtists(artistData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+        // Apply client-side search filtering
+        if (filters?.search) {
+          const searchLower = filters.search.toLowerCase();
+          filteredArtworks = filteredArtworks.filter(artwork => 
+            artwork.title?.toLowerCase().includes(searchLower) ||
+            artwork.description?.toLowerCase().includes(searchLower) ||
+            artwork.materials?.toLowerCase().includes(searchLower) ||
+            artwork.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+          );
+        }
+
+        // Apply region filter (if needed for your use case)
+        if (filters?.region && filters.region !== 'all') {
+          filteredArtworks = filteredArtworks.filter(artwork => 
+            artwork.region?.toLowerCase().replace(/\s+/g, '-') === filters.region
+          );
+        }
+        
+        setArtworks(filteredArtworks);
+      } else {
+        setError(result.error || 'Failed to load artworks');
+        setArtworks([]);
       }
-    };
-
-    fetchArtworksAndArtists();
-  }, []);
-
-  const getArtistByName = (artistName) => {
-    return artists.find(artist => artist.name === artistName);
+    } catch (error) {
+      setError('Network error. Please check your connection and try again.');
+      setArtworks([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-
-  const getFilteredArtworks = () => {
-    let filtered = artworks;
-
-    if (filters?.artform && filters.artform !== 'all') {
-      filtered = filtered.filter(artwork => 
-        artwork.artform.toLowerCase() === filters.artform.toLowerCase()
-      );
-    }
-
-    if (filters?.region && filters.region !== 'all') {
-      filtered = filtered.filter(artwork => 
-        artwork.region.toLowerCase().replace(/\s+/g, '-') === filters.region
-      );
-    }
-
-    if (filters?.search && filters.search.trim()) {
-      const searchTerm = filters.search.toLowerCase();
-      filtered = filtered.filter(artwork => 
-        artwork.title.toLowerCase().includes(searchTerm) ||
-        artwork.artist.toLowerCase().includes(searchTerm) ||
-        artwork.artform.toLowerCase().includes(searchTerm) ||
-        artwork.tags.some(tag => tag.toLowerCase().includes(searchTerm))
-      );
-    }
-
-    // Sort artworks
-    if (filters?.sort) {
-      switch (filters.sort) {
-        case 'newest':
-          filtered.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
-          break;
-        case 'popular':
-          filtered.sort((a, b) => b.popularity - a.popularity);
-          break;
-        case 'price-low-high':
-          filtered.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high-low':
-          filtered.sort((a, b) => b.price - a.price);
-          break;
-        default:
-          break;
-      }
-    }
-
-    return filtered;
+  const retryFetch = () => {
+    fetchArtworks();
   };
-
-  const filteredArtworks = getFilteredArtworks();
 
   if (loading) {
     return (
       <section className="py-12 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-16">
-            <div className="w-12 h-12 bg-amber-200 rounded-full animate-spin mx-auto mb-4"></div>
-            <h3 className="text-xl font-semibold text-amber-900 mb-2">Loading Artworks...</h3>
-            <p className="text-amber-700">Fetching beautiful artworks from our artists</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <LoadingSkeleton count={8} />
           </div>
         </div>
       </section>
     );
   }
 
-  const getArtformColor = (artform) => {
-    const colors = {
-      'Warli': 'bg-amber-100 text-amber-800',
-      'Madhubani': 'bg-red-100 text-red-800',
-      'Pithora': 'bg-orange-100 text-orange-800',
-      'Gond': 'bg-green-100 text-green-800',
-      'Kalamkari': 'bg-purple-100 text-purple-800',
-      'Tanjore': 'bg-yellow-100 text-yellow-800',
-      'Patachitra': 'bg-blue-100 text-blue-800',
-      'Other': 'bg-gray-100 text-gray-800'
-    };
-    return colors[artform] || 'bg-gray-100 text-gray-800';
-  };
+  if (error) {
+    return (
+      <section className="py-12 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-16">
+            <div className="text-8xl mb-6">😔</div>
+            <h3 className="text-2xl font-semibold text-amber-900 mb-4">
+              Oops! Something went wrong
+            </h3>
+            <p className="text-amber-700 max-w-md mx-auto mb-6">
+              {error}
+            </p>
+            <button
+              onClick={retryFetch}
+              className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-6 py-3 rounded-full font-semibold hover:from-amber-700 hover:to-red-700 transition-all duration-200"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
@@ -119,7 +118,7 @@ const GalleryArtworksGrid = ({ filters }) => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-2xl font-bold text-amber-900 mb-2">
-              {filteredArtworks.length} {filteredArtworks.length === 1 ? 'Artwork' : 'Artworks'} Found
+              {artworks.length} {artworks.length === 1 ? 'Artwork' : 'Artworks'} Found
             </h2>
             {filters?.search && (
               <p className="text-amber-700">
@@ -138,7 +137,7 @@ const GalleryArtworksGrid = ({ filters }) => {
           </div>
         </div>
 
-        {filteredArtworks.length === 0 ? (
+        {artworks.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,82 +146,94 @@ const GalleryArtworksGrid = ({ filters }) => {
             </div>
             <h3 className="text-xl font-semibold text-amber-900 mb-2">No artworks found</h3>
             <p className="text-amber-700 mb-6">Try adjusting your filters or search terms to find more artworks.</p>
-            <button className="bg-amber-600 text-white px-6 py-3 rounded-xl hover:bg-amber-700 transition-colors">
-              Clear all filters
-            </button>
+            {filters?.artform && filters.artform !== 'all' && (
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-amber-600 text-white px-6 py-3 rounded-xl hover:bg-amber-700 transition-colors"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredArtworks.map((artwork) => (
-              <div
+            {artworks.map((artwork) => (
+              <Link
                 key={artwork.id}
+                to={`/artwork/${artwork.id}`}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 group"
               >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={artwork.imageUrl}
-                    alt={artwork.title}
-                    className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                <div className="relative overflow-hidden aspect-square bg-gradient-to-br from-amber-50 to-orange-50">
+                  {artwork.imageUrl || artwork.thumbnailUrl ? (
+                    <LazyImage
+                      src={artwork.thumbnailUrl || artwork.imageUrl}
+                      alt={artwork.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-6xl text-amber-400">
+                      🎨
+                    </div>
+                  )}
+                  
                   <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getArtformColor(artwork.artform)}`}>
-                      {artwork.artform}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getArtFormColor(artwork.artForm)}`}>
+                      {artwork.artForm}
                     </span>
                   </div>
                   
-                  {artwork.popularity > 100 && (
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                        🔥 Popular
-                      </span>
+                  {/* Overlay with quick info */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center justify-between text-white">
+                        <div className="text-sm">
+                          <div className="flex items-center gap-1">
+                            <span>👁️</span>
+                            <span>{artwork.views || 0}</span>
+                          </div>
+                        </div>
+                        {artwork.price && (
+                          <div className="text-lg font-bold">
+                            ₹{artwork.price.toLocaleString()}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="font-bold text-lg text-amber-900 mb-2 group-hover:text-amber-700 transition-colors">
-                    {artwork.title}
-                  </h3>
-                  
-                  <div className="flex items-center text-sm text-amber-700 mb-2">
-                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                    <span>by {artwork.artist}</span>
-                    {getArtistByName(artwork.artist)?.isVerified && (
-                      <VerifiedArtistBadge size="xs" className="ml-2" />
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getArtFormColor(artwork.artForm)}`}>
+                      {artwork.artForm}
+                    </span>
+                    {artwork.isForSale && artwork.price && (
+                      <span className="text-lg font-bold text-amber-900">
+                        ₹{artwork.price.toLocaleString()}
+                      </span>
                     )}
                   </div>
-                  
-                  <div className="flex items-center text-sm text-amber-600 mb-4">
-                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                    </svg>
-                    <span>{artwork.region}</span>
-                  </div>
 
-                  <p className="text-amber-800 text-sm mb-4 line-clamp-2">
-                    {artwork.description}
+                  <h3 className="text-lg font-bold text-amber-900 mb-1 line-clamp-1 group-hover:text-amber-700 transition-colors">
+                    {artwork.title}
+                  </h3>
+
+                  <p className="text-amber-700 text-sm mb-2">
+                    {artwork.yearCreated && `Created in ${artwork.yearCreated}`}
                   </p>
 
-                  <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold text-amber-900">
-                      ₹{artwork.price.toLocaleString()}
-                    </div>
-                    <button
-                      onClick={() => setSelectedArtwork(artwork)}
-                      className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md"
-                    >
-                      View Details
-                    </button>
-                  </div>
+                  {artwork.dimensions && (
+                    <p className="text-xs text-amber-600">
+                      {artwork.dimensions}
+                    </p>
+                  )}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
 
-        {filteredArtworks.length > 0 && filteredArtworks.length >= 8 && (
+        {artworks.length > 0 && artworks.length >= 8 && (
           <div className="text-center mt-12">
             <button className="bg-white text-amber-800 border-2 border-amber-300 px-8 py-4 rounded-xl font-semibold hover:bg-amber-50 hover:border-amber-400 transition-all duration-300 shadow-md">
               Load More Artworks
@@ -233,13 +244,6 @@ const GalleryArtworksGrid = ({ filters }) => {
           </div>
         )}
       </div>
-      
-      {selectedArtwork && (
-        <ArtworkModal
-          artwork={selectedArtwork}
-          onClose={() => setSelectedArtwork(null)}
-        />
-      )}
     </section>
   );
 };

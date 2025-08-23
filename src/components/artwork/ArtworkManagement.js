@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { createArtwork, updateArtwork, ART_FORMS, getArtistVerificationProgress } from '../../services/artworkService';
+import { createArtwork, updateArtwork, getArtistVerificationProgress } from '../../services/artworkService';
+import { ART_FORMS } from '../../constants/artForms';
 import BadgeNotification from '../BadgeNotification';
 
 const ArtworkManagement = ({ 
@@ -336,8 +337,8 @@ const ArtworkManagement = ({
                   className={`w-full px-4 py-3 rounded-xl border ${errors.artForm ? 'border-red-400' : 'border-amber-300'} focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200`}
                 >
                   <option value="">Select art form</option>
-                  {ART_FORMS.map(form => (
-                    <option key={form} value={form}>{form}</option>
+                  {ART_FORMS.filter(form => !form.disabled).map(form => (
+                    <option key={form.value} value={form.value}>{form.label}</option>
                   ))}
                 </select>
                 {errors.artForm && (

@@ -1,4 +1,5 @@
 import React from 'react';
+import './FolkArtAnimations.css';
 
 const WhyFolkify = () => {
   const pillars = [
@@ -33,8 +34,52 @@ const WhyFolkify = () => {
   ];
 
   return (
-    <section id="about" className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="py-16 folk-art-background">
+      {/* Mandala Patterns */}
+      <div className="mandala-pattern mandala-1"></div>
+      <div className="mandala-pattern mandala-2"></div>
+      <div className="mandala-pattern mandala-3"></div>
+      <div className="mandala-pattern mandala-4"></div>
+      
+      {/* Warli Art Figures */}
+      <div className="warli-figure warli-1">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-2">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-3">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-4">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-5">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      
+      {/* Geometric Patterns */}
+      <div className="geometric-pattern geo-1"></div>
+      <div className="geometric-pattern geo-2"></div>
+      <div className="geometric-pattern geo-3"></div>
+      
+      {/* Content with overlay */}
+      <div className="folk-content-overlay mx-auto">
+        {/* Warli corner decorations */}
+        <div className="warli-corner-decoration warli-corner-tl"></div>
+        <div className="warli-corner-decoration warli-corner-tr"></div>
+        <div className="warli-corner-decoration warli-corner-bl"></div>
+        <div className="warli-corner-decoration warli-corner-br"></div>
+        
+        {/* Side patterns */}
+        <div className="warli-side-pattern"></div>
+        <div className="warli-side-pattern warli-side-pattern-right"></div>
+        
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-amber-900 mb-4">
             Why Folkify?
@@ -50,7 +95,7 @@ const WhyFolkify = () => {
           {pillars.map((pillar) => (
             <div 
               key={pillar.id} 
-              className="group text-center p-8 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-red-100 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg border border-amber-200/50"
+              className="group text-center p-8 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-red-100 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-lg border border-amber-200/50 warli-pillar-card"
             >
               <div className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">
                 {pillar.icon}

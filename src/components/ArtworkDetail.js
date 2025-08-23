@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getArtwork } from '../services/artworkService';
+import { getArtwork, incrementArtworkViews } from '../services/artworkService';
 import { getArtistProfile } from '../services/artistService';
 import VerifiedArtistBadge from './VerifiedArtistBadge';
 import Navigation from './Navigation';
@@ -25,6 +25,11 @@ const ArtworkDetail = () => {
         }
 
         setArtwork(artworkResult.artwork);
+
+        // Increment view count (fire and forget)
+        incrementArtworkViews(artworkId).catch(err => 
+          console.warn('Failed to increment views:', err)
+        );
 
         // Get artist data
         const artistResult = await getArtistProfile(artworkResult.artwork.artistId);

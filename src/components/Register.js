@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../firebase/auth';
+import { ART_FORMS } from '../constants/artForms';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -246,16 +247,11 @@ const Register = () => {
               className={`w-full px-4 py-3 rounded-xl border ${errors.primaryArtForm ? 'border-red-400' : 'border-amber-300'} focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70`}
               required
             >
-              <option value="">Select your primary art form</option>
-              <option value="warli">Warli</option>
-              <option value="madhubani">Madhubani</option>
-              <option value="pithora">Pithora</option>
-              <option value="gond">Gond</option>
-              <option value="kalamkari">Kalamkari</option>
-              <option value="tanjore">Tanjore</option>
-              <option value="patachitra">Patachitra</option>
-              <option value="miniature">Miniature Painting</option>
-              <option value="other">Other</option>
+              {ART_FORMS.map(form => (
+                <option key={form.value} value={form.value} disabled={form.disabled}>
+                  {form.label}
+                </option>
+              ))}
             </select>
             {errors.primaryArtForm && (
               <p className="text-red-500 text-xs mt-1">{errors.primaryArtForm}</p>

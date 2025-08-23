@@ -7,7 +7,9 @@ const Footer = () => {
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
-    console.log('Newsletter subscription:', email);
+    if (!email.trim()) return;
+    
+    // TODO: Implement actual newsletter subscription service
     setSubscribed(true);
     setEmail('');
     setTimeout(() => setSubscribed(false), 3000);
@@ -45,10 +47,9 @@ const Footer = () => {
           <div>
             <h4 className="text-xl font-semibold mb-6">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#home" className="text-amber-100 hover:text-white transition-colors duration-200">Home</a></li>
-              <li><a href="#explore" className="text-amber-100 hover:text-white transition-colors duration-200">Explore Art</a></li>
+              <li><Link to="/" className="text-amber-100 hover:text-white transition-colors duration-200">Home</Link></li>
+              <li><Link to="/explore" className="text-amber-100 hover:text-white transition-colors duration-200">Explore Art</Link></li>
               <li><a href="#artists" className="text-amber-100 hover:text-white transition-colors duration-200">Artists</a></li>
-              <li><a href="#workshops" className="text-amber-100 hover:text-white transition-colors duration-200">Workshops</a></li>
               <li><a href="#about" className="text-amber-100 hover:text-white transition-colors duration-200">About Us</a></li>
             </ul>
           </div>
@@ -67,7 +68,7 @@ const Footer = () => {
           <div>
             <h4 className="text-xl font-semibold mb-6">Stay Updated</h4>
             <p className="text-amber-100 mb-4 text-sm">
-              Get notified about new folk art collections and exclusive workshops.
+              Get notified about new folk art collections and artist features.
             </p>
             <form onSubmit={handleNewsletterSubmit} className="space-y-3">
               <input

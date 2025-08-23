@@ -16,21 +16,6 @@ import { db } from '../firebase/config';
 import { uploadArtworkImage, deleteArtworkImage } from './cloudinaryService';
 import { checkVerificationStatus, updateArtistWithBadge } from './badgeService';
 
-// Art form categories
-export const ART_FORMS = [
-  'Painting',
-  'Sculpture',
-  'Pottery',
-  'Textiles',
-  'Woodwork',
-  'Metalwork',
-  'Jewelry',
-  'Folk Dance',
-  'Music',
-  'Storytelling',
-  'Other'
-];
-
 /**
  * Create new artwork with Cloudinary image upload
  * @param {string} artistId - Artist's UID
@@ -444,28 +429,79 @@ export const getAllArtists = async (options = {}) => {
     const {
       limitCount = 50,
       orderField = 'createdAt',
-      orderDirection = 'desc'
+      orderDirection = 'desc',
+      isActive = null,
+      includeArtworkCount = false
     } = options;
 
-    let q = query(
-      collection(db, 'users'),
-      orderBy(orderField, orderDirection)
-    );
+    let q = query(collection(db, 'users'));
+
+    if (isActive !== null) {
+      q = query(q, where('isActive', '==', isActive));
+    }
+
+    // Try to add ordering, but handle cases where the field might not exist
+    try {
+      q = query(q, orderBy(orderField, orderDirection));
+    } catch (orderError) {
+      console.warn('Could not order by', orderField, '- proceeding without ordering');
+      // Continue without ordering if the field doesn't exist
+    }
 
     if (limitCount) {
       q = query(q, limit(limitCount));
     }
 
     const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.size === 0) {
+      console.log('No documents found in users collection');
+    }
+    
     const artists = [];
     
-    querySnapshot.forEach((doc) => {
-      const userData = doc.data();
-      artists.push({ 
-        id: doc.id,
-        ...userData
+    if (includeArtworkCount) {
+      // For each artist, get their artwork count (slower but more detailed)
+      for (const doc of querySnapshot.docs) {
+        const userData = doc.data();
+        const artistId = doc.id;
+        
+        // Get artwork count for this artist
+        try {
+          const artworkQuery = query(
+            collection(db, 'artworks'),
+            where('artistId', '==', artistId),
+            where('isActive', '==', true)
+          );
+          
+          const artworkSnapshot = await getDocs(artworkQuery);
+          const artworkCount = artworkSnapshot.size;
+          
+          artists.push({ 
+            id: artistId,
+            ...userData,
+            artworkCount
+          });
+        } catch (artworkError) {
+          console.warn(`Could not fetch artwork count for ${artistId}:`, artworkError);
+          artists.push({ 
+            id: artistId,
+            ...userData,
+            artworkCount: 0
+          });
+        }
+      }
+    } else {
+      // Faster approach - just get artist data without artwork count
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        artists.push({ 
+          id: doc.id,
+          ...userData,
+          artworkCount: userData.artworkCount || 0 // Use cached count if available
+        });
       });
-    });
+    }
 
     return { 
       success: true, 
@@ -473,6 +509,14 @@ export const getAllArtists = async (options = {}) => {
     };
   } catch (error) {
     console.error('Error getting all artists:', error);
+    
+    // Provide more specific error information
+    if (error.code === 'failed-precondition') {
+      console.error('This might be due to missing Firestore indexes. Check the Firebase console.');
+    } else if (error.code === 'permission-denied') {
+      console.error('Permission denied. Check your Firestore security rules.');
+    }
+    
     return { 
       success: false, 
       error: error.message, 
