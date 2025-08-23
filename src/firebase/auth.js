@@ -5,7 +5,18 @@ import {
   onAuthStateChanged,
   updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  collection, 
+  addDoc, 
+  query, 
+  where, 
+  getDocs, 
+  orderBy 
+} from 'firebase/firestore';
 import { auth, db } from './config';
 
 export const registerUser = async (email, password, userData) => {
@@ -93,4 +104,104 @@ export const getCurrentUserData = async (uid) => {
 
 export const onAuthStateChange = (callback) => {
   return onAuthStateChanged(auth, callback);
+};
+
+export const updateUserProfile = async (uid, updatedData) => {
+  try {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+      ...updatedData,
+      updatedAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const addArtwork = async (uid, artworkData) => {
+  try {
+    const artworksRef = collection(db, 'artworks');
+    const docRef = await addDoc(artworksRef, {
+      ...artworkData,
+      artistId: uid,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isActive: true,
+      views: 0,
+      likes: 0
+    });
+    return { success: true, artworkId: docRef.id };
+  } catch (error) {
+    console.error('Error adding artwork:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getUserArtworks = async (uid) => {
+  try {
+    const q = query(
+      collection(db, 'artworks'),
+      where('artistId', '==', uid),
+      where('isActive', '==', true),
+      orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    const artworks = [];
+    querySnapshot.forEach((doc) => {
+      artworks.push({ id: doc.id, ...doc.data() });
+    });
+    return { success: true, artworks };
+  } catch (error) {
+    console.error('Error getting user artworks:', error);
+    return { success: false, error: error.message, artworks: [] };
+  }
+};
+
+export const updateArtwork = async (artworkId, updatedData) => {
+  try {
+    const artworkRef = doc(db, 'artworks', artworkId);
+    await updateDoc(artworkRef, {
+      ...updatedData,
+      updatedAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating artwork:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const deleteArtwork = async (artworkId) => {
+  try {
+    const artworkRef = doc(db, 'artworks', artworkId);
+    await updateDoc(artworkRef, {
+      isActive: false,
+      updatedAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting artwork:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getArtistStats = async (uid) => {
+  try {
+    const artworksResult = await getUserArtworks(uid);
+    const artworks = artworksResult.artworks || [];
+    
+    const stats = {
+      totalArtworks: artworks.length,
+      totalViews: artworks.reduce((sum, artwork) => sum + (artwork.views || 0), 0),
+      totalLikes: artworks.reduce((sum, artwork) => sum + (artwork.likes || 0), 0),
+      recentArtworks: artworks.slice(0, 5)
+    };
+    
+    return { success: true, stats };
+  } catch (error) {
+    console.error('Error getting artist stats:', error);
+    return { success: false, error: error.message };
+  }
 };

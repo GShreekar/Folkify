@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import DashboardNavigation from './DashboardNavigation';
 import WelcomeBanner from './WelcomeBanner';
@@ -47,17 +47,16 @@ const Dashboard = () => {
       <DashboardNavigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <WelcomeBanner artistData={userData} />
+                <WelcomeBanner />
 
-        <ArtistProfileOverview artistData={userData} />
+        <ArtistProfileOverview />
 
         <ExportComplianceCard artistData={userData} />
 
-        <MyArtworksSection
-          artworks={artworks}
-          artistData={userData}
-          onArtistUpdate={handleArtistUpdate}
-        />
+          <MyArtworksSection
+            artworks={artworks}
+            artistData={userData}
+          />
       </div>
 
       <DashboardFooter />

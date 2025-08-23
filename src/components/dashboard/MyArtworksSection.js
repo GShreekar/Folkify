@@ -1,293 +1,217 @@
 import React, { useState } from 'react';
-import { processArtworkUpload } from '../../services/badgeService';
+import { useAuth } from '../../contexts/AuthContext';
+import { deleteArtwork } from '../../firebase/auth';
+import ArtworkManagement from '../artwork/ArtworkManagement';
 import BadgeNotification from '../BadgeNotification';
 
-const MyArtworksSection = ({ artworks = [], artistData, onArtistUpdate }) => {
-  const [showUploadForm, setShowUploadForm] = useState(false);
+const MyArtworksSection = () => {
+  const { userArtworks, loadUserArtworks } = useAuth();
+  const [showArtworkForm, setShowArtworkForm] = useState(false);
+  const [editingArtwork, setEditingArtwork] = useState(null);
   const [notification, setNotification] = useState(null);
-  const [uploadFormData, setUploadFormData] = useState({
-    title: '',
-    description: '',
-    artform: '',
-    image: null,
-    price: ''
-  });
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'approved':
-        return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">✅ Approved</span>;
-      case 'pending':
-        return <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">⏳ Pending Review</span>;
-      case 'rejected':
-        return <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">❌ Rejected</span>;
-      default:
-        return <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">Status Unknown</span>;
-    }
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleUploadFormChange = (e) => {
-    const { name, value, files } = e.target;
-    setUploadFormData(prev => ({
-      ...prev,
-      [name]: files ? files[0] : value
-    }));
-  };
-
-  const handleUploadSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleDeleteArtwork = async (artworkId) => {
     try {
-      // TODO: Replace with Firebase/backend API call
-      const artworkData = {
-        ...uploadFormData,
-        id: Date.now(),
-        artistId: artistData?.id || 1,
-        artist: artistData?.name || 'Current Artist',
-        region: artistData?.region || 'Unknown Region',
-        status: 'approved',
-        uploadDate: new Date().toISOString()
-      };
-
-      console.log('Uploading artwork:', artworkData);
-      
-      const updatedArtworks = [...artworks, artworkData];
-      
-      if (artistData && onArtistUpdate) {
-        const result = processArtworkUpload(artistData, updatedArtworks);
-        
-        if (result.verificationChanged) {
-          onArtistUpdate(result.updatedArtist);
-        }
-        
-        if (result.notification) {
-          setNotification(result.notification);
-        }
+      const result = await deleteArtwork(artworkId);
+      if (result.success) {
+        await loadUserArtworks();
+        showNotification('Artwork deleted successfully');
+        setDeleteConfirm(null);
+      } else {
+        showNotification(result.error, 'error');
       }
-
-      
-      setShowUploadForm(false);
-      setUploadFormData({
-        title: '',
-        description: '',
-        artform: '',
-        image: null,
-        price: ''
-      });
-
     } catch (error) {
-      console.error('Error uploading artwork:', error);
-      setNotification({
-        type: 'error',
-        title: 'Upload Failed',
-        message: 'Error uploading artwork. Please try again.',
-        duration: 4000
-      });
+      showNotification('Failed to delete artwork', 'error');
     }
+  };
+
+  const handleArtworkSuccess = () => {
+    setShowArtworkForm(false);
+    setEditingArtwork(null);
+    showNotification('Artwork saved successfully');
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return 'Not for sale';
+    return `₹${price.toLocaleString('en-IN')}`;
   };
 
   return (
-    <div className="mb-8">
-      <BadgeNotification 
-        notification={notification} 
-        onClose={() => setNotification(null)} 
-      />
-      
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-6">
+      {notification && (
+        <BadgeNotification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-amber-900">My Artworks</h2>
         <button
-          onClick={() => setShowUploadForm(true)}
-          className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center"
+          onClick={() => setShowArtworkForm(true)}
+          className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
         >
-          <span className="mr-2">+</span>
-          Upload Artwork
+          + Add New Artwork
         </button>
       </div>
 
-      {showUploadForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-amber-900">Upload New Artwork</h3>
-                <button
-                  onClick={() => setShowUploadForm(false)}
-                  className="text-amber-600 hover:text-amber-800 text-2xl"
-                >
-                  ×
-                </button>
-              </div>
-
-              <form onSubmit={handleUploadSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-amber-800 mb-2">
-                    Title *
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={uploadFormData.title}
-                    onChange={handleUploadFormChange}
-                    className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                    placeholder="Enter artwork title"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-amber-800 mb-2">
-                    Description / Story *
-                  </label>
-                  <textarea
-                    name="description"
-                    value={uploadFormData.description}
-                    onChange={handleUploadFormChange}
-                    rows="4"
-                    className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 resize-none"
-                    placeholder="Tell the story behind your artwork..."
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-amber-800 mb-2">
-                    Art Form *
-                  </label>
-                  <select
-                    name="artform"
-                    value={uploadFormData.artform}
-                    onChange={handleUploadFormChange}
-                    className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                    required
-                  >
-                    <option value="">Select art form</option>
-                    <option value="warli">Warli</option>
-                    <option value="pithora">Pithora</option>
-                    <option value="madhubani">Madhubani</option>
-                    <option value="gond">Gond</option>
-                    <option value="kalamkari">Kalamkari</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-amber-800 mb-2">
-                    Upload Image *
-                  </label>
-                  <input
-                    type="file"
-                    name="image"
-                    onChange={handleUploadFormChange}
-                    accept="image/*"
-                    className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                    required
-                  />
-                  {uploadFormData.image && (
-                    <div className="mt-3">
-                      <img
-                        src={URL.createObjectURL(uploadFormData.image)}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-xl border border-amber-200"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-amber-800 mb-2">
-                    Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={uploadFormData.price}
-                    onChange={handleUploadFormChange}
-                    className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                    placeholder="Enter price (optional)"
-                    min="0"
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowUploadForm(false)}
-                    className="flex-1 border border-amber-600 text-amber-700 py-3 px-4 rounded-xl font-semibold hover:bg-amber-50 transition-all duration-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 bg-gradient-to-r from-amber-600 to-red-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transition-all duration-200"
-                  >
-                    Save & Submit for Review
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+      {userArtworks.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🎨</div>
+          <h3 className="text-xl font-semibold text-amber-900 mb-2">No Artworks Yet</h3>
+          <p className="text-amber-600 mb-6">
+            Start building your portfolio by uploading your first artwork!
+          </p>
+          <button
+            onClick={() => setShowArtworkForm(true)}
+            className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transition-all duration-200"
+          >
+            Upload Your First Artwork
+          </button>
         </div>
-      )}
-
-      {artworks.length > 0 ? (
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {artworks.map((artwork) => (
-            <div key={artwork.id} className="bg-white rounded-xl shadow-lg border border-amber-200/50 overflow-hidden">
-              <div className="aspect-square bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
-                {artwork.image ? (
-                  <img src={artwork.image} alt={artwork.title} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-6xl">🎨</span>
-                )}
+          {userArtworks.map((artwork) => (
+            <div
+              key={artwork.id}
+              className="bg-amber-50 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-200 border border-amber-200"
+            >
+              <div className="h-48 bg-gradient-to-br from-amber-200 to-red-200 flex items-center justify-center">
+                <span className="text-6xl">🎨</span>
               </div>
 
               <div className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-bold text-amber-900 truncate">{artwork.title}</h3>
-                  {getStatusBadge(artwork.status)}
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-lg font-semibold text-amber-900 truncate">
+                    {artwork.title}
+                  </h3>
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => setEditingArtwork(artwork)}
+                      className="text-amber-600 hover:text-amber-700 p-1"
+                      title="Edit artwork"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(artwork.id)}
+                      className="text-red-600 hover:text-red-700 p-1"
+                      title="Delete artwork"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
 
-                <p className="text-amber-600 text-sm mb-3 line-clamp-2">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium">
+                    {artwork.artForm}
+                  </span>
+                  {artwork.isForSale && (
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                      For Sale
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-amber-600 text-sm line-clamp-3 mb-3">
                   {artwork.description}
                 </p>
 
-                {artwork.price && (
-                  <div className="text-xl font-bold text-amber-900 mb-3">
-                    ₹{artwork.price}
+                <div className="flex justify-between items-center text-xs text-amber-700">
+                  <span>{formatDate(artwork.createdAt)}</span>
+                  <span className="font-semibold">{formatPrice(artwork.price)}</span>
+                </div>
+
+                {artwork.tags && artwork.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {artwork.tags.slice(0, 3).map((tag, index) => (
+                      <span
+                        key={index}
+                        className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                    {artwork.tags.length > 3 && (
+                      <span className="text-xs text-amber-600">
+                        +{artwork.tags.length - 3} more
+                      </span>
+                    )}
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  <button className="flex-1 bg-amber-100 text-amber-800 py-2 px-3 rounded-lg text-sm font-medium hover:bg-amber-200 transition-colors duration-200">
-                    Edit
-                  </button>
-                  <button className="flex-1 bg-red-100 text-red-800 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors duration-200">
-                    Delete
-                  </button>
-                  <button className="flex-1 bg-blue-100 text-blue-800 py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors duration-200">
-                    View
-                  </button>
+                <div className="mt-3 pt-3 border-t border-amber-200 grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-lg font-semibold text-amber-800">
+                      {artwork.views || 0}
+                    </div>
+                    <div className="text-xs text-amber-600">Views</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold text-red-800">
+                      {artwork.likes || 0}
+                    </div>
+                    <div className="text-xs text-red-600">Likes</div>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
-      ) : (
-        <div className="text-center py-16 bg-white rounded-2xl border border-amber-200/50">
-          <div className="text-8xl mb-6">🎨</div>
-          <h3 className="text-2xl font-semibold text-amber-800 mb-4">
-            No Artworks Yet
-          </h3>
-          <p className="text-amber-600 mb-6 max-w-md mx-auto">
-            Upload your first artwork to start showcasing your talent to the world. 
-            Share the story behind your art!
-          </p>
-          <button
-            onClick={() => setShowUploadForm(true)}
-            className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200"
-          >
-            Upload Your First Artwork
-          </button>
+      )}
+
+      {(showArtworkForm || editingArtwork) && (
+        <ArtworkManagement
+          artwork={editingArtwork}
+          isEditing={!!editingArtwork}
+          onSuccess={handleArtworkSuccess}
+          onCancel={() => {
+            setShowArtworkForm(false);
+            setEditingArtwork(null);
+          }}
+        />
+      )}
+
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md mx-4">
+            <h3 className="text-xl font-semibold text-amber-900 mb-3">
+              Delete Artwork
+            </h3>
+            <p className="text-amber-700 mb-6">
+              Are you sure you want to delete this artwork? This action cannot be undone.
+            </p>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteArtwork(deleteConfirm)}
+                className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
