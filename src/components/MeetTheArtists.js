@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VerifiedArtistBadge from './VerifiedArtistBadge';
+import './FolkArtAnimations.css';
 
 const MeetTheArtists = () => {
   const [artists, setArtists] = useState([]);
@@ -29,8 +30,99 @@ const MeetTheArtists = () => {
   };
 
   return (
-    <section id="artists" className="py-16 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="artists" className="py-16 folk-art-background">
+      {/* Enhanced Mandala Patterns */}
+      <div className="mandala-pattern mandala-1"></div>
+      <div className="mandala-pattern mandala-2"></div>
+      <div className="mandala-complex complex-1">
+        <div className="mandala-petals"></div>
+      </div>
+      <div className="mandala-complex complex-2">
+        <div className="mandala-petals"></div>
+      </div>
+      
+      {/* Warli Art Elements */}
+      <div className="warli-figure warli-1">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-2">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-3">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      
+      {/* Warli Trees */}
+      <div className="warli-tree tree-1">
+        <div className="warli-tree-branches"></div>
+      </div>
+      <div className="warli-tree tree-2">
+        <div className="warli-tree-branches"></div>
+      </div>
+      <div className="warli-tree tree-3">
+        <div className="warli-tree-branches"></div>
+      </div>
+      
+      {/* Warli Peacocks */}
+      <div className="warli-peacock peacock-1">
+        <div className="peacock-tail"></div>
+      </div>
+      <div className="warli-peacock peacock-2">
+        <div className="peacock-tail"></div>
+      </div>
+      
+      {/* Warli Celebration Circles */}
+      <div className="warli-celebration celebration-1">
+        <div className="celebration-figure fig-1">
+          <div className="celebration-arms"></div>
+          <div className="celebration-legs"></div>
+        </div>
+        <div className="celebration-figure fig-2">
+          <div className="celebration-arms"></div>
+          <div className="celebration-legs"></div>
+        </div>
+        <div className="celebration-figure fig-3">
+          <div className="celebration-arms"></div>
+          <div className="celebration-legs"></div>
+        </div>
+        <div className="celebration-figure fig-4">
+          <div className="celebration-arms"></div>
+          <div className="celebration-legs"></div>
+        </div>
+        <div className="celebration-figure fig-5">
+          <div className="celebration-arms"></div>
+          <div className="celebration-legs"></div>
+        </div>
+        <div className="celebration-figure fig-6">
+          <div className="celebration-arms"></div>
+          <div className="celebration-legs"></div>
+        </div>
+      </div>
+      
+      {/* Tribal Patterns */}
+      <div className="tribal-pattern tribal-1"></div>
+      <div className="tribal-pattern tribal-2"></div>
+      <div className="tribal-pattern tribal-3"></div>
+      
+      {/* Geometric Patterns */}
+      <div className="geometric-pattern geo-1"></div>
+      <div className="geometric-pattern geo-2"></div>
+      
+      {/* Content with overlay */}
+      <div className="folk-content-overlay max-w-7xl mx-auto">
+        {/* Warli corner decorations */}
+        <div className="warli-corner-decoration warli-corner-tl"></div>
+        <div className="warli-corner-decoration warli-corner-tr"></div>
+        <div className="warli-corner-decoration warli-corner-bl"></div>
+        <div className="warli-corner-decoration warli-corner-br"></div>
+        
+        {/* Side patterns */}
+        <div className="warli-side-pattern"></div>
+        <div className="warli-side-pattern warli-side-pattern-right"></div>
+        
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-amber-900 mb-4">
             Meet the Artists
@@ -53,7 +145,7 @@ const MeetTheArtists = () => {
             {artists.map((artist) => (
               <div 
                 key={artist.id} 
-                className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-200/50 p-6 text-center"
+                className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-200/50 p-6 text-center warli-artist-card"
               >
                 <div className="relative mb-4">
                   <div className="w-20 h-20 mx-auto bg-gradient-to-br from-amber-200 to-red-200 rounded-full flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-300">
@@ -108,7 +200,7 @@ const MeetTheArtists = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 mb-12">
+          <div className="text-center py-16 mb-12 warli-artist-card bg-white/90 backdrop-blur-sm rounded-2xl mx-4 border border-amber-200/50">
             <div className="text-8xl mb-6">🎨</div>
             <h3 className="text-2xl font-semibold text-amber-800 mb-4">
               Amazing Artists Joining Soon
