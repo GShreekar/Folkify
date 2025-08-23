@@ -64,12 +64,12 @@ const ArtworkManagement = ({
         return;
       }
 
-      // Validate file size (10MB max for Cloudinary)
-      const maxSize = 10 * 1024 * 1024;
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         setErrors(prev => ({
           ...prev,
-          image: 'Image size must be less than 10MB'
+          image: 'Image size must be less than 5MB'
         }));
         return;
       }
@@ -236,7 +236,7 @@ const ArtworkManagement = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                   <p className="text-amber-600 text-sm font-medium">Click to upload image</p>
-                  <p className="text-amber-500 text-xs">JPEG, PNG, WebP (max 10MB)</p>
+                  <p className="text-amber-500 text-xs">JPEG, PNG, WebP (max 5MB)</p>
                 </div>
               )}
               

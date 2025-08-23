@@ -2,10 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { 
   onAuthStateChange, 
   getCurrentUserData, 
-  updateUserProfile,
-  getUserArtworks,
-  getArtistStats
+  updateUserProfile
 } from '../firebase/auth';
+import { getUserArtworks, getArtistStats } from '../services/artworkService';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const AuthContext = createContext();
