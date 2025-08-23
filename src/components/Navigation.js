@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { logoutUser } from '../firebase/auth';
 
 const Navigation = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { currentUser, userData } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <nav className="bg-white/95 backdrop-blur-sm shadow-lg border-b-2 border-amber-200 sticky top-0 z-50">
@@ -56,13 +67,33 @@ const Navigation = () => {
             </div>
           </div>
 
-          <div className="flex-shrink-0">
-            <Link 
-              to="/login" 
-              className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              For Artists → Login
-            </Link>
+          <div className="flex-shrink-0 flex items-center space-x-3">
+            {currentUser ? (
+              <>
+                <span className="text-amber-800 text-sm">
+                  Welcome, {userData?.fullName || currentUser.email}
+                </span>
+                <Link 
+                  to="/dashboard" 
+                  className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  Dashboard
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-600 transition-all duration-200"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link 
+                to="/login" 
+                className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                For Artists → Login
+              </Link>
+            )}
           </div>
         </div>
       </div>

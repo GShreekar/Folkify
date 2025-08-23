@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { logoutUser } from '../../firebase/auth';
 
 const DashboardNavigation = () => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const { userData } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    console.log('Logging out...');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
+      if (result.success) {
+        navigate('/login');
+      }
+    } catch (error) {
+      navigate('/login');
+    }
   };
 
   return (

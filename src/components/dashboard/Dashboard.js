@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import DashboardNavigation from './DashboardNavigation';
 import WelcomeBanner from './WelcomeBanner';
 import ArtistProfileOverview from './ArtistProfileOverview';
@@ -7,18 +8,15 @@ import ExportComplianceCard from './ExportComplianceCard';
 import DashboardFooter from './DashboardFooter';
 
 const Dashboard = () => {
-  const [artistData, setArtistData] = useState(null);
+  const { currentUser, userData } = useAuth();
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // TODO: Replace with Firebase/backend API call
-        // Load current logged-in artist data from database
-        
-        // For now, set empty data - to be replaced with real data from Firebase
-        setArtistData(null);
+        // Load artworks for the current user
+        // TODO: Implement artwork fetching from Firestore
         setArtworks([]);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -27,11 +25,13 @@ const Dashboard = () => {
       }
     };
 
-    loadDashboardData();
-  }, []);
+    if (currentUser && userData) {
+      loadDashboardData();
+    }
+  }, [currentUser, userData]);
 
   const handleArtistUpdate = (updatedArtist) => {
-    setArtistData(updatedArtist);
+    console.log('Artist updated:', updatedArtist);
   };
 
   if (loading) {
@@ -47,15 +47,15 @@ const Dashboard = () => {
       <DashboardNavigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <WelcomeBanner artistData={artistData} />
+        <WelcomeBanner artistData={userData} />
 
-        <ArtistProfileOverview artistData={artistData} />
+        <ArtistProfileOverview artistData={userData} />
 
-        <ExportComplianceCard artistData={artistData} />
+        <ExportComplianceCard artistData={userData} />
 
         <MyArtworksSection
           artworks={artworks}
-          artistData={artistData}
+          artistData={userData}
           onArtistUpdate={handleArtistUpdate}
         />
       </div>

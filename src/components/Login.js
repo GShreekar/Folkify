@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { loginUser } from '../firebase/auth';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -13,13 +16,33 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (errors[e.target.name]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: ''
+      });
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here - for now just redirect to dashboard
-    console.log('Login attempt:', formData);
-    navigate('/dashboard');
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      const result = await loginUser(formData.email, formData.password);
+      
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setErrors({ submit: result.error });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrors({ submit: 'An unexpected error occurred. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -41,18 +64,21 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-amber-800 mb-2">
-              Email / Username
+              Email
             </label>
             <input
-              type="text"
+              type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70 placeholder-amber-600/50"
-              placeholder="Enter your email or username"
+              className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-400' : 'border-amber-300'} focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70 placeholder-amber-600/50`}
+              placeholder="Enter your email"
               required
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
 
           <div>
@@ -65,17 +91,31 @@ const Login = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70 placeholder-amber-600/50"
+              className={`w-full px-4 py-3 rounded-xl border ${errors.password ? 'border-red-400' : 'border-amber-300'} focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 bg-white/70 placeholder-amber-600/50`}
               placeholder="Enter your password"
               required
             />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
           </div>
+
+          {errors.submit && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-xl text-sm">
+              {errors.submit}
+            </div>
+          )}
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+            disabled={isLoading}
+            className={`w-full font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl ${
+              isLoading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-amber-600 to-red-600 text-white hover:from-amber-700 hover:to-red-700 transform hover:scale-105'
+            }`}
           >
-            Login
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
