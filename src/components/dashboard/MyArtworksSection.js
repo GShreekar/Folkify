@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { deleteArtwork } from '../../services/artworkService';
-import ArtworkManagement from '../artwork/ArtworkManagement';
+import ArtworkForm from '../artwork/ArtworkForm';
 
 const MyArtworksSection = () => {
   const { userArtworks, refreshUserProfile } = useAuth();
@@ -140,10 +140,6 @@ const MyArtworksSection = () => {
                 </div>
 
                 <div className="flex items-center justify-between text-sm text-amber-600 py-3 border-t border-amber-200">
-                  <div className="flex items-center space-x-4">
-                    <span>👁 {artwork.views || 0} views</span>
-                    <span>❤️ {artwork.likes || 0} likes</span>
-                  </div>
                   <span>Created: {formatDate(artwork.createdAt)}</span>
                 </div>
 
@@ -293,11 +289,6 @@ const MyArtworksSection = () => {
                 </p>
 
                 <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center space-x-3 text-amber-600">
-                    <span>👁 {artwork.views || 0}</span>
-                    <span>❤️ {artwork.likes || 0}</span>
-                  </div>
-                  
                   {artwork.isForSale && artwork.price && (
                     <span className="font-semibold text-green-600 text-xs">
                       {formatPrice(artwork.price, artwork.currency)}
@@ -314,17 +305,23 @@ const MyArtworksSection = () => {
         </div>
       )}
 
-      {/* Modals */}
-      <ArtworkManagement
-        isOpen={showArtworkForm}
-        onClose={() => {
-          setShowArtworkForm(false);
-          setEditingArtwork(null);
-        }}
-        artwork={editingArtwork}
-        onSuccess={handleArtworkSuccess}
-      />
+      {/* Artwork Form */}
+      {showArtworkForm && (
+        <div className="mt-10 mb-4">
+          <ArtworkForm
+            key="artwork-form"
+            isOpen={showArtworkForm}
+            onClose={() => {
+              setShowArtworkForm(false);
+              setEditingArtwork(null);
+            }}
+            artwork={editingArtwork}
+            onSuccess={handleArtworkSuccess}
+          />
+        </div>
+      )}
 
+      {/* Other Modals */}
       <ArtworkDetailsModal
         artwork={selectedArtwork}
         onClose={() => setSelectedArtwork(null)}

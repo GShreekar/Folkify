@@ -13,9 +13,8 @@ const GalleryArtworksGrid = ({ filters }) => {
   const sortOptions = [
     { id: 'newest', name: 'Newest First', field: 'createdAt', direction: 'desc' },
     { id: 'oldest', name: 'Oldest First', field: 'createdAt', direction: 'asc' },
-    { id: 'price-low-high', name: 'Price: Low to High', field: 'price', direction: 'asc' },
-    { id: 'price-high-low', name: 'Price: High to Low', field: 'price', direction: 'desc' },
-    { id: 'popular', name: 'Most Popular', field: 'views', direction: 'desc' }
+    { id: 'price-high', name: 'Price: High to Low', field: 'price', direction: 'desc' },
+    { id: 'price-low', name: 'Price: Low to High', field: 'price', direction: 'asc' }
   ];
 
   useEffect(() => {
@@ -128,7 +127,7 @@ const GalleryArtworksGrid = ({ filters }) => {
           </div>
           
           <div className="hidden md:flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm">
-            <button className="px-3 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm font-medium">
+            <button className="px-3 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm font-medium hover:bg-amber-200 transition-colors duration-200">
               Grid
             </button>
             <button className="px-3 py-2 text-amber-600 rounded-lg text-sm font-medium hover:bg-amber-50">
@@ -186,12 +185,6 @@ const GalleryArtworksGrid = ({ filters }) => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute bottom-4 left-4 right-4">
                       <div className="flex items-center justify-between text-white">
-                        <div className="text-sm">
-                          <div className="flex items-center gap-1">
-                            <span>👁️</span>
-                            <span>{artwork.views || 0}</span>
-                          </div>
-                        </div>
                         {artwork.price && (
                           <div className="text-lg font-bold">
                             ₹{artwork.price.toLocaleString()}

@@ -9,8 +9,7 @@ import {
   getDoc, 
   updateDoc, 
   deleteDoc,
-  limit,
-  increment
+  limit
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadArtworkImage, deleteArtworkImage } from './cloudinaryService';
@@ -58,8 +57,6 @@ export const createArtwork = async (artistId, artworkData, imageFile = null) => 
       artistId: artistId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      views: 0,
-      likes: 0,
       isActive: true
     };
 
@@ -379,47 +376,6 @@ export const getArtwork = async (artworkId) => {
 };
 
 /**
- * Increment artwork views
- * @param {string} artworkId - Artwork ID
- * @returns {Promise<Object>} - Result with success status
- */
-export const incrementArtworkViews = async (artworkId) => {
-  try {
-    const artworkRef = doc(db, 'artworks', artworkId);
-    
-    await updateDoc(artworkRef, {
-      views: increment(1)
-    });
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error incrementing views:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Toggle artwork like
- * @param {string} artworkId - Artwork ID
- * @param {boolean} isLiked - Whether to add or remove like
- * @returns {Promise<Object>} - Result with success status
- */
-export const toggleArtworkLike = async (artworkId, isLiked) => {
-  try {
-    const artworkRef = doc(db, 'artworks', artworkId);
-    
-    await updateDoc(artworkRef, {
-      likes: increment(isLiked ? 1 : -1)
-    });
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error toggling like:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-/**
  * Get all artists
  * @param {Object} options - Query options
  * @returns {Promise<Object>} - Result with artists array
@@ -435,6 +391,9 @@ export const getAllArtists = async (options = {}) => {
     } = options;
 
     let q = query(collection(db, 'users'));
+
+    // Filter to only include users with role 'artist'
+    q = query(q, where('role', '==', 'artist'));
 
     if (isActive !== null) {
       q = query(q, where('isActive', '==', isActive));
@@ -577,8 +536,6 @@ export const getArtistStats = async (artistId) => {
     
     const stats = {
       totalArtworks: artworks.length,
-      totalViews: artworks.reduce((sum, artwork) => sum + (artwork.views || 0), 0),
-      totalLikes: artworks.reduce((sum, artwork) => sum + (artwork.likes || 0), 0),
       artFormsCount: [...new Set(artworks.map(a => a.artForm))].length,
       recentArtworks: artworks.slice(0, 5)
     };

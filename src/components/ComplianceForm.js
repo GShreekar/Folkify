@@ -7,6 +7,7 @@ import {
   deleteComplianceDocument,
   submitForReview 
 } from '../services/complianceService';
+import './FolkArtAnimations.css';
 
 const ComplianceForm = () => {
   const { currentUser } = useAuth();
@@ -245,51 +246,78 @@ const ComplianceForm = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Export Compliance Checklist</h1>
-        <p className="text-gray-600">
-          Complete sections at your own pace. Your progress is automatically saved as you work.
-        </p>
-        
-        {/* Progress Bar */}
-        <div className="mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">Completion Progress</span>
-            <span className="text-sm text-gray-600">{complianceData.completionPercentage}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div 
-              className={`h-3 rounded-full transition-all duration-300 ${
-                complianceData.isExportReady ? 'bg-green-500' : 'bg-blue-500'
-              }`}
-              style={{ width: `${complianceData.completionPercentage}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Status Badge */}
-        <div className="mt-4">
-          {complianceData.submittedForReview ? (
-            <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
-              complianceData.reviewStatus === 'approved' ? 'bg-green-100 text-green-800' :
-              complianceData.reviewStatus === 'rejected' ? 'bg-red-100 text-red-800' :
-              'bg-yellow-100 text-yellow-800'
-            }`}>
-              <span>{
-                complianceData.reviewStatus === 'approved' ? '✅' :
-                complianceData.reviewStatus === 'rejected' ? '❌' : '⏳'
-              }</span>
-              <span>
-                {complianceData.reviewStatus === 'approved' ? 'Approved for Export' :
-                 complianceData.reviewStatus === 'rejected' ? 'Review Required' :
-                 'Under Review'}
-              </span>
+    <div className="min-h-screen folk-art-background">
+      {/* Mandala Patterns */}
+      <div className="mandala-pattern mandala-1"></div>
+      <div className="mandala-pattern mandala-2"></div>
+      <div className="mandala-pattern mandala-3"></div>
+      
+      {/* Warli Art Figures */}
+      <div className="warli-figure warli-1">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-2">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-3">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      
+      {/* Geometric Patterns */}
+      <div className="geometric-pattern geo-1"></div>
+      <div className="geometric-pattern geo-2"></div>
+      
+      <div className="relative z-10 flex justify-center items-start min-h-screen py-8 px-4">
+        <div className="w-full max-w-4xl bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-amber-200/50 folk-content-overlay">
+          <div className="p-6">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Export Compliance Checklist</h1>
+              <p className="text-gray-600">
+                Complete sections at your own pace. Your progress is automatically saved as you work.
+              </p>
+            
+              {/* Progress Bar */}
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">Completion Progress</span>
+                  <span className="text-sm text-gray-600">{complianceData.completionPercentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      complianceData.isExportReady ? 'bg-green-500' : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${complianceData.completionPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
             </div>
-          ) : complianceData.isExportReady ? (
-            <div className="inline-flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-              <span>✅</span>
-              <span>Ready for Submission</span>
+
+            {/* Status Badge */}
+            <div className="mt-4">
+              {complianceData.submittedForReview ? (
+                <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  complianceData.reviewStatus === 'approved' ? 'bg-green-100 text-green-800' :
+                  complianceData.reviewStatus === 'rejected' ? 'bg-red-100 text-red-800' :
+                  'bg-yellow-100 text-yellow-800'
+                }`}>
+                  <span>{
+                    complianceData.reviewStatus === 'approved' ? '✅' :
+                    complianceData.reviewStatus === 'rejected' ? '❌' : '⏳'
+                  }</span>
+                  <span>
+                    {complianceData.reviewStatus === 'approved' ? 'Approved for Export' :
+                     complianceData.reviewStatus === 'rejected' ? 'Review Required' :
+                     'Under Review'}
+                  </span>
+                </div>
+              ) : complianceData.isExportReady ? (
+                <div className="inline-flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <span>✅</span>
+                  <span>Ready for Submission</span>
             </div>
           ) : (
             <div className="inline-flex items-center space-x-2 bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
@@ -598,6 +626,8 @@ const ComplianceForm = () => {
             </button>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

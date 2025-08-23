@@ -94,12 +94,22 @@ const Navigation = () => {
                 <span className="text-amber-800 text-sm">
                   Welcome, {userData?.fullName || currentUser.email}
                 </span>
-                <Link 
-                  to="/dashboard" 
-                  className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
-                >
-                  Dashboard
-                </Link>
+                {userData?.role === 'artist' && (
+                  <Link 
+                    to="/dashboard" 
+                    className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                {userData?.role !== 'artist' && (
+                  <Link 
+                    to="/purchase-history" 
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    My Purchases
+                  </Link>
+                )}
                 <button 
                   onClick={handleLogout}
                   className="bg-gray-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-600 transition-all duration-200"
@@ -108,12 +118,26 @@ const Navigation = () => {
                 </button>
               </>
             ) : (
-              <Link 
-                to="/login" 
-                className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
-              >
-                For Artists → Login
-              </Link>
+              <>
+                <Link 
+                  to="/user-login" 
+                  className="text-amber-800 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/user-register" 
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  Sign Up
+                </Link>
+                <Link 
+                  to="/login" 
+                  className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  For Artists
+                </Link>
+              </>
             )}
           </div>
 
@@ -210,13 +234,24 @@ const Navigation = () => {
                 <div className="px-3 py-2 text-sm text-amber-800">
                   Welcome, {userData?.fullName || currentUser.email}
                 </div>
-                <Link 
-                  to="/dashboard" 
-                  className="block px-3 py-2 text-amber-900 hover:text-amber-700 font-medium transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
+                {userData?.role === 'artist' && (
+                  <Link 
+                    to="/dashboard" 
+                    className="block px-3 py-2 text-amber-900 hover:text-amber-700 font-medium transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                {userData?.role !== 'artist' && (
+                  <Link 
+                    to="/purchase-history" 
+                    className="block px-3 py-2 text-blue-900 hover:text-blue-700 font-medium transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    My Purchases
+                  </Link>
+                )}
                 <button 
                   onClick={() => {
                     handleLogout();
@@ -230,18 +265,25 @@ const Navigation = () => {
             ) : (
               <>
                 <Link 
-                  to="/login" 
+                  to="/user-login" 
                   className="block px-3 py-2 text-amber-900 hover:text-amber-700 font-medium transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link 
-                  to="/register" 
+                  to="/user-register" 
                   className="block px-3 py-2 text-amber-900 hover:text-amber-700 font-medium transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Become an Artist
+                  Sign Up
+                </Link>
+                <Link 
+                  to="/login" 
+                  className="block px-3 py-2 text-amber-900 hover:text-amber-700 font-medium transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  For Artists
                 </Link>
               </>
             )}

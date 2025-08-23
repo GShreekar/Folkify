@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllArtworks, ART_FORMS, incrementArtworkViews } from '../../services/artworkService';
+import { getAllArtworks, ART_FORMS } from '../../services/artworkService';
 import LoadingSpinner from '../LoadingSpinner';
 
 const ArtworkGallery = ({ 
@@ -60,9 +60,6 @@ const ArtworkGallery = ({
       case 'oldest':
         filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         break;
-      case 'popular':
-        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
-        break;
       case 'price-high':
         filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
@@ -76,14 +73,8 @@ const ArtworkGallery = ({
     setFilteredArtworks(filtered);
   };
 
-  const handleArtworkClick = async (artwork) => {
+  const handleArtworkClick = (artwork) => {
     setSelectedArtwork(artwork);
-    
-    try {
-      await incrementArtworkViews(artwork.id);
-    } catch (error) {
-      console.error('Error incrementing views:', error);
-    }
   };
 
   const formatPrice = (price, currency = 'INR') => {
@@ -188,11 +179,6 @@ const ArtworkGallery = ({
                     </div>
                   </div>
                 )}
-
-                <div className="flex items-center space-x-4 text-sm text-amber-600">
-                  <span>👁 {artwork.views || 0} views</span>
-                  <span>❤️ {artwork.likes || 0} likes</span>
-                </div>
               </div>
             </div>
           </div>
@@ -243,7 +229,6 @@ const ArtworkGallery = ({
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
-                <option value="popular">Most Popular</option>
                 <option value="price-high">Price: High to Low</option>
                 <option value="price-low">Price: Low to High</option>
               </select>
@@ -304,11 +289,6 @@ const ArtworkGallery = ({
                 </p>
 
                 <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center space-x-3 text-amber-600">
-                    <span>👁 {artwork.views || 0}</span>
-                    <span>❤️ {artwork.likes || 0}</span>
-                  </div>
-                  
                   {artwork.isForSale && artwork.price && (
                     <span className="font-semibold text-green-600">
                       {formatPrice(artwork.price, artwork.currency)}

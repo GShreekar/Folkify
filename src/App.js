@@ -6,6 +6,8 @@ import PublicRoute from './components/PublicRoute';
 import HomePage from './components/HomePage';
 import Login from './components/Login';
 import Register from './components/Register';
+import UserLogin from './components/UserLogin';
+import UserRegister from './components/UserRegister';
 import Dashboard from './components/dashboard/Dashboard';
 import Gallery from './components/gallery/Gallery';
 import ArtistProfile from './components/ArtistProfile';
@@ -13,6 +15,7 @@ import ArtworkDetail from './components/ArtworkDetail';
 import BadgeSystem from './components/BadgeSystem';
 import ExportComplianceChecklist from './components/ExportComplianceChecklist';
 import ComplianceForm from './components/ComplianceForm';
+import PurchaseHistory from './components/PurchaseHistory';
 import './App.css';
 
 function App() {
@@ -39,10 +42,34 @@ function App() {
               } 
             />
             <Route 
+              path="/user-login" 
+              element={
+                <PublicRoute>
+                  <UserLogin />
+                </PublicRoute>
+              } 
+            />
+            <Route 
+              path="/user-register" 
+              element={
+                <PublicRoute>
+                  <UserRegister />
+                </PublicRoute>
+              } 
+            />
+            <Route 
               path="/dashboard" 
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/purchase-history" 
+              element={
+                <ProtectedRoute>
+                  <PurchaseHistory />
                 </ProtectedRoute>
               } 
             />

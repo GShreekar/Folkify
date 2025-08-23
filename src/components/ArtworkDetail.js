@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getArtwork, incrementArtworkViews } from '../services/artworkService';
+import { getArtwork } from '../services/artworkService';
 import { getArtistProfile } from '../services/artistService';
+import { useAuth } from '../contexts/AuthContext';
 import VerifiedArtistBadge from './VerifiedArtistBadge';
 import Navigation from './Navigation';
 import Footer from './Footer';
+import PurchaseModal from './artwork/PurchaseModal';
+import './FolkArtAnimations.css';
 
 const ArtworkDetail = () => {
   const { artworkId } = useParams();
+  const { currentUser, loading: authLoading } = useAuth();
   const [artwork, setArtwork] = useState(null);
   const [artist, setArtist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+
+  const handlePurchaseSuccess = (purchaseId) => {
+    setPurchaseSuccess(true);
+    console.log('Purchase created successfully:', purchaseId);
+    // You could add a toast notification here
+  };
 
   useEffect(() => {
     const loadArtworkDetail = async () => {
@@ -25,11 +37,6 @@ const ArtworkDetail = () => {
         }
 
         setArtwork(artworkResult.artwork);
-
-        // Increment view count (fire and forget)
-        incrementArtworkViews(artworkId).catch(err => 
-          console.warn('Failed to increment views:', err)
-        );
 
         // Get artist data
         const artistResult = await getArtistProfile(artworkResult.artwork.artistId);
@@ -98,10 +105,33 @@ const ArtworkDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+    <div className="min-h-screen folk-art-background">
+      {/* Mandala Patterns */}
+      <div className="mandala-pattern mandala-1"></div>
+      <div className="mandala-pattern mandala-2"></div>
+      <div className="mandala-pattern mandala-3"></div>
+      
+      {/* Warli Art Figures */}
+      <div className="warli-figure warli-1">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-2">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-3">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      
+      {/* Geometric Patterns */}
+      <div className="geometric-pattern geo-1"></div>
+      <div className="geometric-pattern geo-2"></div>
+      
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <button
           onClick={() => window.history.back()}
@@ -238,35 +268,61 @@ const ArtworkDetail = () => {
                 </div>
               )}
 
-              {/* Stats */}
-              <div className="flex items-center gap-6 mb-6 text-amber-600">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <span>{artwork.views || 0} views</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                  <span>{artwork.likes || 0} likes</span>
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                {artwork.isForSale && (
-                  <button className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200">
-                    Contact Artist
+                {/* Buy Button - Show only when logged in and not loading */}
+                {artwork.isForSale && !authLoading && currentUser && (
+                  <button 
+                    onClick={() => setShowPurchaseModal(true)}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200"
+                  >
+                    Buy Artwork
                   </button>
                 )}
-                
-                <button className="flex-1 bg-amber-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-amber-700 transform hover:scale-105 transition-all duration-200">
-                  Share Artwork
-                </button>
+
+                {/* Login prompt - Show only when not loading and not logged in */}
+                {artwork.isForSale && !authLoading && !currentUser && (
+                  <div className="flex-1">
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                      <p className="text-amber-800 text-sm text-center">
+                        Please{' '}
+                        <a 
+                          href="/login"
+                          className="underline font-medium hover:text-amber-900"
+                        >
+                          log in
+                        </a>{' '}
+                        to purchase this artwork
+                      </p>
+                    </div>
+                    <button 
+                      disabled
+                      className="w-full bg-gray-300 text-gray-500 py-3 px-6 rounded-xl font-semibold cursor-not-allowed"
+                    >
+                      Buy Artwork
+                    </button>
+                  </div>
+                )}
+
+                {/* Loading state - Show loading button while auth is being determined */}
+                {artwork.isForSale && authLoading && (
+                  <button 
+                    disabled
+                    className="flex-1 bg-gray-300 text-gray-500 py-3 px-6 rounded-xl font-semibold cursor-not-allowed"
+                  >
+                    Loading...
+                  </button>
+                )}
+
+                {!artwork.isForSale && (
+                  <div className="flex-1 text-center py-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                      <p className="text-gray-600 text-sm">
+                        This artwork is not currently for sale
+                      </p>
+                    </div>
+                  </div>
+                )}
                 
                 {artist && (
                   <button 
@@ -277,10 +333,34 @@ const ArtworkDetail = () => {
                   </button>
                 )}
               </div>
+
+              {/* Purchase Success Message */}
+              {purchaseSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
+                  <div className="flex items-center space-x-3">
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div>
+                      <h5 className="text-green-800 font-medium">Purchase Request Submitted!</h5>
+                      <p className="text-green-700 text-sm">The artist has been notified of your interest.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      {showPurchaseModal && (
+        <PurchaseModal
+          artwork={artwork}
+          onClose={() => setShowPurchaseModal(false)}
+          onSuccess={handlePurchaseSuccess}
+        />
+      )}
 
       <Footer />
     </div>

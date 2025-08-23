@@ -50,6 +50,32 @@ export const registerUser = async (email, password, userData) => {
   }
 };
 
+export const registerBuyerUser = async (email, password, userData) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await updateProfile(user, {
+      displayName: userData.fullName
+    });
+
+    await setDoc(doc(db, 'users', user.uid), {
+      uid: user.uid,
+      email: email,
+      fullName: userData.fullName,
+      phoneNumber: userData.phoneNumber,
+      address: userData.address || '',
+      createdAt: new Date().toISOString(),
+      role: 'buyer'
+    });
+
+    return { success: true, user: userCredential.user };
+  } catch (error) {
+    console.error('Registration error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);

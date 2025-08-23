@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { createArtwork, updateArtwork, getArtistVerificationProgress } from '../../services/artworkService';
 import { ART_FORMS } from '../../constants/artForms';
 import BadgeNotification from '../BadgeNotification';
+import '../FolkArtAnimations.css';
 
 const ArtworkManagement = ({ 
   isOpen, 
@@ -35,6 +36,8 @@ const ArtworkManagement = ({
   const isEditing = !!artwork;
 
   if (!isOpen) return null;
+
+  console.log('ArtworkManagement rendering - ID:', Math.random().toString(36).substr(2, 9));
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -219,8 +222,308 @@ const ArtworkManagement = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div 
+      style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10000,
+        padding: '20px'
+      }}
+      onClick={onClose}
+    >
+        /* ARTWORK MANAGEMENT MODAL */
+        <div 
+        style={{ 
+          backgroundColor: 'white',
+          borderRadius: '20px',
+          padding: '30px',
+          width: '100%',
+          maxWidth: '600px',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          position: 'relative'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '15px',
+            right: '15px',
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            width: '30px',
+            height: '30px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          ×
+        </button>
+
+        {/* Header */}
+        <h2 style={{ marginTop: 0, marginBottom: '30px', color: '#92400e', fontSize: '28px', fontWeight: 'bold' }}>
+          {isEditing ? 'Edit Artwork' : 'Add New Artwork'}
+        </h2>
+
+        <form onSubmit={handleSubmit}>
+          {/* Error Display */}
+          {errors.submit && (
+            <div style={{ 
+              backgroundColor: '#fee2e2', 
+              border: '1px solid #fecaca', 
+              color: '#dc2626', 
+              padding: '12px', 
+              borderRadius: '8px',
+              marginBottom: '20px'
+            }}>
+              {errors.submit}
+            </div>
+          )}
+
+          {/* Image Upload */}
+          <div style={{ marginBottom: '25px' }}>
+            <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', color: '#92400e' }}>
+              Artwork Image {!isEditing && <span style={{ color: '#dc2626' }}>*</span>}
+            </label>
+            
+            {imagePreview ? (
+              <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{ 
+                      width: '200px', 
+                      height: '200px', 
+                      objectFit: 'cover', 
+                      borderRadius: '15px',
+                      border: '3px solid #f59e0b'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(artwork?.imageUrl || null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '5px',
+                      right: '5px',
+                      backgroundColor: '#dc2626',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '30px',
+                      height: '30px',
+                      cursor: 'pointer',
+                      fontSize: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  border: '2px dashed #f59e0b',
+                  borderRadius: '15px',
+                  padding: '40px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: '#fffbeb',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#fef3c7'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#fffbeb'}
+              >
+                <div style={{ fontSize: '48px', marginBottom: '10px' }}>📸</div>
+                <div style={{ color: '#92400e', fontWeight: '600', marginBottom: '5px' }}>
+                  Click to upload image
+                </div>
+                <div style={{ color: '#d97706', fontSize: '14px' }}>
+                  PNG, JPG up to 10MB
+                </div>
+              </div>
+            )}
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: 'none' }}
+            />
+            {errors.image && <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '5px' }}>{errors.image}</div>}
+          </div>
+
+          {/* Title */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#92400e' }}>
+              Title <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Enter artwork title"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #fbbf24',
+                borderRadius: '10px',
+                fontSize: '16px',
+                backgroundColor: '#fffbeb',
+                outline: 'none'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#f59e0b'}
+              onBlur={(e) => e.target.style.borderColor = '#fbbf24'}
+            />
+            {errors.title && <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '5px' }}>{errors.title}</div>}
+          </div>
+
+          {/* Description */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#92400e' }}>
+              Description <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Describe your artwork..."
+              rows={4}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #fbbf24',
+                borderRadius: '10px',
+                fontSize: '16px',
+                backgroundColor: '#fffbeb',
+                outline: 'none',
+                resize: 'vertical',
+                minHeight: '100px'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#f59e0b'}
+              onBlur={(e) => e.target.style.borderColor = '#fbbf24'}
+            />
+            {errors.description && <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '5px' }}>{errors.description}</div>}
+          </div>
+
+          {/* Art Form */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#92400e' }}>
+              Art Form <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <select
+              name="artForm"
+              value={formData.artForm}
+              onChange={handleChange}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #fbbf24',
+                borderRadius: '10px',
+                fontSize: '16px',
+                backgroundColor: '#fffbeb',
+                outline: 'none'
+              }}
+            >
+              <option value="">Select an art form</option>
+              {ART_FORMS.map((form) => (
+                <option key={form.id} value={form.id}>
+                  {form.name}
+                </option>
+              ))}
+            </select>
+            {errors.artForm && <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '5px' }}>{errors.artForm}</div>}
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end', marginTop: '30px' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '12px 24px',
+                border: '2px solid #fbbf24',
+                borderRadius: '10px',
+                backgroundColor: 'white',
+                color: '#92400e',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #f59e0b, #dc2626)',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.7 : 1
+              }}
+            >
+              {isSubmitting 
+                ? (isEditing ? 'Updating...' : 'Creating...')
+                : (isEditing ? 'Update Artwork' : 'Create Artwork')
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+        {/* Folk Art Background */}
+        <div className="folk-art-background absolute inset-0 rounded-3xl overflow-hidden opacity-20">
+          {/* Mandala Patterns */}
+          <div className="mandala-pattern mandala-1"></div>
+          <div className="mandala-pattern mandala-2"></div>
+          
+          {/* Warli Art Figures */}
+          <div className="warli-figure warli-1">
+            <div className="warli-arms"></div>
+            <div className="warli-legs"></div>
+          </div>
+          <div className="warli-figure warli-2">
+            <div className="warli-arms"></div>
+            <div className="warli-legs"></div>
+          </div>
+          
+          {/* Geometric Patterns */}
+          <div className="geometric-pattern geo-1"></div>
+        </div>
+        
+        {/* Form Container */}
+        <div className="relative z-10 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white rounded-t-3xl border-b border-amber-200 p-6">
           <div className="flex items-center justify-between">

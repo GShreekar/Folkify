@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { loginUser } from '../firebase/auth';
+import { useNavigate, Link } from 'react-router-dom';
+import { loginUser, getCurrentUserData } from '../firebase/auth';
+import './FolkArtAnimations.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -33,7 +34,21 @@ const Login = () => {
       const result = await loginUser(formData.email, formData.password);
       
       if (result.success) {
-        navigate('/dashboard');
+        // Get user data to check role
+        const userDataResult = await getCurrentUserData(result.user.uid);
+        
+        if (userDataResult.success) {
+          const userRole = userDataResult.userData.role;
+          
+          // Redirect based on role
+          if (userRole === 'artist') {
+            navigate('/dashboard');
+          } else {
+            navigate('/');
+          }
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         setErrors({ submit: result.error });
       }
@@ -46,14 +61,31 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 opacity-5">
-        <div className="h-full w-full" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23a0522d' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+    <div className="min-h-screen folk-art-background flex items-center justify-center p-4">
+      {/* Mandala Patterns */}
+      <div className="mandala-pattern mandala-1"></div>
+      <div className="mandala-pattern mandala-2"></div>
+      <div className="mandala-pattern mandala-3"></div>
+      
+      {/* Warli Art Figures */}
+      <div className="warli-figure warli-1">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
       </div>
+      <div className="warli-figure warli-2">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-3">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      
+      {/* Geometric Patterns */}
+      <div className="geometric-pattern geo-1"></div>
+      <div className="geometric-pattern geo-2"></div>
 
-      <div className="relative bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-2xl w-full max-w-md border border-amber-200/50">
+      <div className="relative z-10 bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-2xl w-full max-w-md border border-amber-200/50 folk-content-overlay">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold folkify-title mb-2">
             Folkify
@@ -119,7 +151,7 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-6 space-y-3">
           <p className="text-amber-700">
             New here?{' '}
             <Link 
@@ -127,6 +159,15 @@ const Login = () => {
               className="text-red-600 hover:text-red-700 font-semibold underline underline-offset-2 hover:underline-offset-4 transition-all duration-200"
             >
               Register as an Artist
+            </Link>
+          </p>
+          <p className="text-amber-700">
+            Want to buy art?{' '}
+            <Link 
+              to="/user-register" 
+              className="text-blue-600 hover:text-blue-700 font-semibold underline underline-offset-2 hover:underline-offset-4 transition-all duration-200"
+            >
+              Register as User
             </Link>
           </p>
         </div>

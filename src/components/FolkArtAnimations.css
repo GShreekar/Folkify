@@ -962,3 +962,40 @@
     border-radius: 15px;
   }
 }
+
+/* Modal Popup Styles */
+.modal-popup {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+}
+
+.modal-backdrop {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  z-index: 1 !important;
+}
+
+.modal-content {
+  position: relative !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(8px) !important;
+  max-width: 56rem !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow: hidden !important;
+  z-index: 2 !important;
+}

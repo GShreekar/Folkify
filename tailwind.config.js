@@ -10,6 +10,7 @@ module.exports = {
         'bounce-slow': 'bounce 3s ease-in-out infinite',
         'spin-slow': 'spin 8s linear infinite',
         'twinkle': 'twinkle 2s ease-in-out infinite alternate',
+        'sway': 'sway 4s ease-in-out infinite',
       },
       keyframes: {
         'float-gentle': {
@@ -20,11 +21,15 @@ module.exports = {
           '0%': { opacity: '0.3' },
           '100%': { opacity: '1' },
         },
+        'sway': {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '50%': { transform: 'rotate(5deg)' },
+        },
       },
     },
   },
   plugins: [
-    require('@tailwindcss/line-clamp'),
+    // @tailwindcss/line-clamp is now included by default in Tailwind CSS v3.3+
   ],
 }
 

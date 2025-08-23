@@ -13,6 +13,7 @@ const MeetTheArtists = () => {
 
   useEffect(() => {
     fetchArtists();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatArtistData = (user) => {
@@ -31,7 +32,8 @@ const MeetTheArtists = () => {
       experienceYears: user.experienceYears || user.experience || Math.floor(Math.random() * 15) + 5,
       isVerified: user.isVerified || false,
       isActive: user.isActive !== false,
-      userType: user.userType || 'artist'
+      userType: user.userType || user.role || 'artist', // Use role field if userType is not available
+      role: user.role || 'artist' // Ensure role is preserved
     };
   };
 
@@ -45,7 +47,13 @@ const MeetTheArtists = () => {
       
       if (allUsersResult.success) {
         if (allUsersResult.artists.length > 0) {
-          const formattedArtists = allUsersResult.artists.map(formatArtistData);
+          const formattedArtists = allUsersResult.artists
+            .map(formatArtistData)
+            .filter(artist => 
+              artist.role === 'artist' || 
+              artist.userType === 'artist' || 
+              (!artist.role && !artist.userType) // Legacy artists without role field
+            );
           const artistsToShow = formattedArtists.slice(0, 6);
           setArtists(artistsToShow);
         }
@@ -264,11 +272,7 @@ const MeetTheArtists = () => {
           </div>
         )}
 
-        <div className="text-center">
-          <button className="bg-white border-2 border-amber-600 text-amber-700 px-8 py-4 rounded-full text-lg font-semibold hover:bg-amber-600 hover:text-white transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
-            Explore All Artists
-          </button>
-        </div>
+  {/* Explore All Artists button removed as requested */}
       </div>
     </section>
   );

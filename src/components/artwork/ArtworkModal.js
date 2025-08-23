@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import PurchaseModal from './PurchaseModal';
 
 const ArtworkModal = ({ artwork, onClose }) => {
+  const { currentUser, loading } = useAuth();
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+
   if (!artwork) return null;
+
+  const handlePurchaseSuccess = (purchaseId) => {
+    setPurchaseSuccess(true);
+    console.log('Purchase created successfully:', purchaseId);
+    // You could add a toast notification here
+  };
 
   const formatPrice = (price, currency = 'INR') => {
     if (!price) return 'Price on request';
@@ -137,39 +149,98 @@ const ArtworkModal = ({ artwork, onClose }) => {
                 </div>
               )}
 
-              {/* Stats */}
-              <div className="flex items-center space-x-6 text-amber-600 pt-4 border-t border-amber-200">
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <span>{artwork.views || 0} views</span>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                  <span>{artwork.likes || 0} likes</span>
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                {artwork.isForSale && (
-                  <button className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200">
-                    Contact Artist
+                {artwork.isForSale && currentUser && (
+                  <button 
+                    onClick={() => setShowPurchaseModal(true)}
+                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200"
+                  >
+                    Buy Artwork
                   </button>
                 )}
-                
-                <button className="flex-1 bg-amber-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-amber-700 transform hover:scale-105 transition-all duration-200">
-                  Share Artwork
-                </button>
+
+                                {/* Buy Now Button - Show only when logged in and not loading */}
+                {artwork.isForSale && !loading && currentUser && (
+                  <button
+                    onClick={() => setShowPurchaseModal(true)}
+                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    Buy Now - {formatPrice(artwork.price)}
+                  </button>
+                )}
+
+                {/* Login prompt - Show only when not loading and not logged in */}
+                {artwork.isForSale && !loading && !currentUser && (
+                  <div className="w-full">
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                      <p className="text-amber-800 text-sm text-center">
+                        Please{' '}
+                        <button 
+                          onClick={onClose}
+                          className="underline font-medium hover:text-amber-900"
+                        >
+                          log in
+                        </button>{' '}
+                        to purchase this artwork
+                      </p>
+                    </div>
+                    <button 
+                      disabled
+                      className="w-full bg-gray-300 text-gray-500 py-3 px-6 rounded-xl font-semibold cursor-not-allowed"
+                    >
+                      Login Required
+                    </button>
+                  </div>
+                )}
+
+                {/* Loading state - Show loading button while auth is being determined */}
+                {artwork.isForSale && loading && (
+                  <button 
+                    disabled
+                    className="w-full bg-gray-300 text-gray-500 py-3 px-6 rounded-xl font-semibold cursor-not-allowed"
+                  >
+                    Loading...
+                  </button>
+                )}
+
+                {!artwork.isForSale && (
+                  <div className="w-full text-center py-6">
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                      <p className="text-gray-600 text-sm">
+                        This artwork is not currently for sale
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Purchase Success Message */}
+              {purchaseSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-4">
+                  <div className="flex items-center space-x-3">
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div>
+                      <h5 className="text-green-800 font-medium">Purchase Request Submitted!</h5>
+                      <p className="text-green-700 text-sm">The artist has been notified of your interest.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Purchase Modal */}
+        {showPurchaseModal && (
+          <PurchaseModal
+            artwork={artwork}
+            onClose={() => setShowPurchaseModal(false)}
+            onSuccess={handlePurchaseSuccess}
+          />
+        )}
       </div>
     </div>
   );

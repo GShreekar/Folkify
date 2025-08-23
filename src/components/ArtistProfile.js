@@ -5,6 +5,7 @@ import VerifiedArtistBadge from './VerifiedArtistBadge';
 import ArtworkModal from './artwork/ArtworkModal';
 import Navigation from './Navigation';
 import Footer from './Footer';
+import './FolkArtAnimations.css';
 
 const ArtistProfile = () => {
   const { artistId } = useParams();
@@ -44,9 +45,23 @@ const ArtistProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+      <div className="min-h-screen folk-art-background">
+        {/* Mandala Patterns */}
+        <div className="mandala-pattern mandala-1"></div>
+        <div className="mandala-pattern mandala-2"></div>
+        
+        {/* Warli Art Figures */}
+        <div className="warli-figure warli-1">
+          <div className="warli-arms"></div>
+          <div className="warli-legs"></div>
+        </div>
+        <div className="warli-figure warli-2">
+          <div className="warli-arms"></div>
+          <div className="warli-legs"></div>
+        </div>
+        
         <Navigation />
-        <div className="flex items-center justify-center py-20">
+        <div className="relative z-10 flex items-center justify-center py-20">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-amber-800 text-lg">Loading artist profile...</p>
@@ -78,10 +93,33 @@ const ArtistProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+    <div className="min-h-screen folk-art-background">
+      {/* Mandala Patterns */}
+      <div className="mandala-pattern mandala-1"></div>
+      <div className="mandala-pattern mandala-2"></div>
+      <div className="mandala-pattern mandala-3"></div>
+      
+      {/* Warli Art Figures */}
+      <div className="warli-figure warli-1">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-2">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-3">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      
+      {/* Geometric Patterns */}
+      <div className="geometric-pattern geo-1"></div>
+      <div className="geometric-pattern geo-2"></div>
+      
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Artist Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-8 mb-8">
           <div className="flex flex-col lg:flex-row items-start gap-8">
@@ -136,12 +174,6 @@ const ArtistProfile = () => {
                     <div className="text-sm text-green-600">
                       {artist.isVerified ? 'Verified' : 'Pending'}
                     </div>
-                  </div>
-                  <div className="text-center bg-blue-50 rounded-lg p-3">
-                    <div className="text-2xl font-bold text-blue-800">
-                      {artworks.reduce((total, artwork) => total + (artwork.views || 0), 0)}
-                    </div>
-                    <div className="text-sm text-blue-600">Total Views</div>
                   </div>
                 </div>
               </div>
@@ -261,11 +293,6 @@ const ArtistProfile = () => {
                     <p className="text-gray-600 text-sm line-clamp-2 mb-3">{artwork.description}</p>
 
                     <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-3 text-amber-600">
-                        <span>👁 {artwork.views || 0}</span>
-                        <span>❤️ {artwork.likes || 0}</span>
-                      </div>
-                      
                       {artwork.isForSale && artwork.price && (
                         <span className="font-semibold text-green-600">
                           {formatPrice(artwork.price, artwork.currency)}

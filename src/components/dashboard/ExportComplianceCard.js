@@ -50,30 +50,9 @@ const ExportComplianceCard = ({ artistData }) => {
     );
   }
 
-  // Calculate completion status for the 5 main sections
-  const getSectionCompletionStatus = (sectionId) => {
-    if (!complianceData) return false;
-    
-    const value = complianceData[sectionId];
-    if (typeof value === 'boolean') {
-      return value;
-    } else if (typeof value === 'string') {
-      return value && value.trim().length > 0;
-    } else if (Array.isArray(value)) {
-      return value && value.length > 0;
-    } else if (value && typeof value === 'object') {
-      return true;
-    }
-    return false;
-  };
-
-  const completedSections = mainSections.filter(section => 
-    getSectionCompletionStatus(section.id)
-  );
-  const completedCount = completedSections.length;
-  const totalCount = mainSections.length;
-  const completionPercentage = Math.round((completedCount / totalCount) * 100);
-  const isExportReady = completedCount === totalCount;
+  // Use backend-calculated completionPercentage for consistency
+  const completionPercentage = complianceData?.completionPercentage || 0;
+  const isExportReady = complianceData?.isExportReady || false;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-amber-200/50 p-6 mb-8">
@@ -106,7 +85,7 @@ const ExportComplianceCard = ({ artistData }) => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-amber-700">Progress</span>
-          <span className="text-sm font-medium text-amber-900">{completedCount}/{totalCount} Complete</span>
+          <span className="text-sm font-medium text-amber-900">{completionPercentage}% Complete</span>
         </div>
         <div className="w-full bg-amber-100 rounded-full h-3">
           <div 
@@ -123,9 +102,17 @@ const ExportComplianceCard = ({ artistData }) => {
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         {mainSections.map(section => {
-          const isCompleted = getSectionCompletionStatus(section.id);
           const value = complianceData?.[section.id];
-          
+          let isCompleted = false;
+          if (typeof value === 'boolean') {
+            isCompleted = value;
+          } else if (typeof value === 'string') {
+            isCompleted = value && value.trim().length > 0;
+          } else if (Array.isArray(value)) {
+            isCompleted = value && value.length > 0;
+          } else if (value && typeof value === 'object') {
+            isCompleted = true;
+          }
           return (
             <div key={section.id} className="text-center group relative">
               <div className={`text-2xl mb-1 transition-all duration-200 ${isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
@@ -157,7 +144,7 @@ const ExportComplianceCard = ({ artistData }) => {
           <div className="flex items-start space-x-2">
             <div className="text-blue-500 text-sm">💡</div>
             <div className="text-blue-800 text-sm">
-              <strong>Progress update:</strong> {totalCount - completedCount} section{totalCount - completedCount !== 1 ? 's' : ''} remaining. Work at your own pace - you can submit for review anytime!
+              <strong>Progress update:</strong> {100 - completionPercentage}% remaining. Work at your own pace - you can submit for review anytime!
             </div>
           </div>
         </div>

@@ -14,11 +14,11 @@ const GalleryFilters = ({ onFiltersChange }) => {
 
   const categories = ART_FORM_CATEGORIES;
 
-  const sortOptions = [
+    const sortOptions = [
     { value: 'newest', label: 'Newest First' },
-    { value: 'popular', label: 'Most Popular' },
-    { value: 'price-low-high', label: 'Price: Low to High' },
-    { value: 'price-high-low', label: 'Price: High to Low' }
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'price-high', label: 'Price: High to Low' },
+    { value: 'price-low', label: 'Price: Low to High' },
   ];
 
   // Debounce search term

@@ -29,18 +29,18 @@ const Footer = () => {
               </p>
             </div>
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200">
+              <button className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200" aria-label="Facebook">
                 <span className="text-lg">📘</span>
-              </a>
-              <a href="#" className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200">
+              </button>
+              <button className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200" aria-label="Instagram">
                 <span className="text-lg">📸</span>
-              </a>
-              <a href="#" className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200">
+              </button>
+              <button className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200" aria-label="Twitter">
                 <span className="text-lg">🐦</span>
-              </a>
-              <a href="#" className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200">
+              </button>
+              <button className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors duration-200" aria-label="YouTube">
                 <span className="text-lg">📺</span>
-              </a>
+              </button>
             </div>
           </div>
 
@@ -59,9 +59,9 @@ const Footer = () => {
             <ul className="space-y-3">
               <li><Link to="/register" className="text-amber-100 hover:text-white transition-colors duration-200">Join as Artist</Link></li>
               <li><Link to="/login" className="text-amber-100 hover:text-white transition-colors duration-200">Artist Login</Link></li>
-              <li><a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Seller Guidelines</a></li>
-              <li><a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Pricing Tips</a></li>
-              <li><a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Success Stories</a></li>
+              <li><button className="text-amber-100 hover:text-white transition-colors duration-200 text-left">Seller Guidelines</button></li>
+              <li><button className="text-amber-100 hover:text-white transition-colors duration-200 text-left">Pricing Tips</button></li>
+              <li><button className="text-amber-100 hover:text-white transition-colors duration-200 text-left">Success Stories</button></li>
             </ul>
           </div>
 
@@ -92,11 +92,11 @@ const Footer = () => {
         <div className="border-t border-amber-700 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm">
-              <a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Privacy Policy</a>
-              <a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Terms of Service</a>
-              <a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Shipping Policy</a>
-              <a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Return Policy</a>
-              <a href="#" className="text-amber-100 hover:text-white transition-colors duration-200">Contact Us</a>
+              <button className="text-amber-100 hover:text-white transition-colors duration-200">Privacy Policy</button>
+              <button className="text-amber-100 hover:text-white transition-colors duration-200">Terms of Service</button>
+              <button className="text-amber-100 hover:text-white transition-colors duration-200">Shipping Policy</button>
+              <button className="text-amber-100 hover:text-white transition-colors duration-200">Return Policy</button>
+              <button className="text-amber-100 hover:text-white transition-colors duration-200">Contact Us</button>
             </div>
 
             <div className="text-sm text-amber-100">

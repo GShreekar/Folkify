@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { ART_FORMS } from '../../constants/artForms';
+import '../FolkArtAnimations.css';
 
 const ProfileEdit = ({ onClose, onSuccess }) => {
   const { userData, updateProfile, profileLoading } = useAuth();
@@ -127,8 +128,25 @@ const ProfileEdit = ({ onClose, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 folk-art-background">
+      {/* Mandala Patterns */}
+      <div className="mandala-pattern mandala-1"></div>
+      <div className="mandala-pattern mandala-2"></div>
+      
+      {/* Warli Art Figures */}
+      <div className="warli-figure warli-1">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      <div className="warli-figure warli-2">
+        <div className="warli-arms"></div>
+        <div className="warli-legs"></div>
+      </div>
+      
+      {/* Geometric Patterns */}
+      <div className="geometric-pattern geo-1"></div>
+      
+      <div className="relative z-10 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-amber-200/50 folk-content-overlay">
         <div className="sticky top-0 bg-white rounded-t-3xl border-b border-amber-200 p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-amber-800">Edit Profile</h2>
