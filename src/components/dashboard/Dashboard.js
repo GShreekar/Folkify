@@ -1,14 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardNavigation from './DashboardNavigation';
 import WelcomeBanner from './WelcomeBanner';
 import ArtistProfileOverview from './ArtistProfileOverview';
 import MyArtworksSection from './MyArtworksSection';
+import ExportComplianceCard from './ExportComplianceCard';
 import DashboardFooter from './DashboardFooter';
+import mockDB from '../../services/mockDatabaseService';
 
 const Dashboard = () => {
-  // All data will be fetched from database later
-  const artistData = null; // Will be fetched from API
-  const artworks = []; // Will be fetched from API
+  // State for artist data and artworks
+  const [artistData, setArtistData] = useState(null);
+  const [artworks, setArtworks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load initial data (simulating current logged-in artist)
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        // For demo purposes, load the first artist (Jangarh Singh Shyam)
+        const artist = await mockDB.getArtist(1);
+        const artistArtworks = await mockDB.getArtworksByArtist(1);
+
+        setArtistData(artist);
+        setArtworks(artistArtworks);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  // Handle artist data updates (e.g., after verification status change)
+  const handleArtistUpdate = (updatedArtist) => {
+    setArtistData(updatedArtist);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center">
+        <div className="text-amber-900 text-xl">Loading dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
@@ -19,7 +55,13 @@ const Dashboard = () => {
 
         <ArtistProfileOverview artistData={artistData} />
 
-        <MyArtworksSection artworks={artworks} />
+        <ExportComplianceCard artistData={artistData} />
+
+        <MyArtworksSection
+          artworks={artworks}
+          artistData={artistData}
+          onArtistUpdate={handleArtistUpdate}
+        />
       </div>
 
       <DashboardFooter />

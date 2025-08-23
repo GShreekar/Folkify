@@ -1,7 +1,9 @@
 import React from 'react';
+import VerifiedArtistBadge from './VerifiedArtistBadge';
+import { mockArtists } from '../data/mockData';
 
 const MeetTheArtists = () => {
-  const artists = [];
+  const artists = mockArtists;
 
   const getSpecialtyColor = (specialty) => {
     if (specialty.includes('Warli')) return 'text-amber-700 bg-amber-100';
@@ -40,9 +42,14 @@ const MeetTheArtists = () => {
 
                 <div className="space-y-3">
                   <div>
-                    <h3 className="text-xl font-bold text-amber-900 mb-1">
-                      {artist.name}
-                    </h3>
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <h3 className="text-xl font-bold text-amber-900">
+                        {artist.name}
+                      </h3>
+                      {artist.isVerified && (
+                        <VerifiedArtistBadge size="xs" />
+                      )}
+                    </div>
                     <p className="text-amber-700 text-sm font-medium">
                       {artist.location}
                     </p>
@@ -60,7 +67,7 @@ const MeetTheArtists = () => {
 
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-200">
                     <div>
-                      <div className="text-lg font-bold text-amber-900">{artist.artworks}</div>
+                      <div className="text-lg font-bold text-amber-900">{artist.artworkCount}</div>
                       <div className="text-xs text-amber-600">Artworks</div>
                     </div>
                     <div>
