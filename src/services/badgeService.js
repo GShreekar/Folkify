@@ -10,15 +10,15 @@ export const BADGE_CONFIG = {
 /**
  * Check if an artist qualifies for verification badge
  * @param {Object} artist - Artist object
- * @param {Array} artworks - Array of approved artworks by the artist
+ * @param {Array} artworks - Array of artworks by the artist (no approval needed)
  * @returns {Object} - Verification status and details
  */
 export const checkVerificationStatus = (artist, artworks = []) => {
-  const approvedArtworks = artworks.filter(artwork => 
-    artwork.status === 'approved' && artwork.artistId === artist.id
+  const artistArtworks = artworks.filter(artwork => 
+    artwork.artistId === artist.id && artwork.isActive
   );
   
-  const artworkCount = approvedArtworks.length;
+  const artworkCount = artistArtworks.length;
   const shouldBeVerified = artworkCount >= BADGE_CONFIG.VERIFICATION_THRESHOLD;
   const wasAlreadyVerified = artist.isVerified || false;
   

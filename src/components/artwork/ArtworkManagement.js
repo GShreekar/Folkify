@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { createArtwork, updateArtwork, ART_FORMS } from '../../services/artworkService';
+import { createArtwork, updateArtwork, ART_FORMS, getArtistVerificationProgress } from '../../services/artworkService';
+import BadgeNotification from '../BadgeNotification';
 
 const ArtworkManagement = ({ 
   isOpen, 
@@ -28,6 +29,7 @@ const ArtworkManagement = ({
   const [imagePreview, setImagePreview] = useState(artwork?.imageUrl || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [badgeNotification, setBadgeNotification] = useState(null);
 
   const isEditing = !!artwork;
 
@@ -167,9 +169,41 @@ const ArtworkManagement = ({
       }
 
       if (result.success) {
+        // Check if artist was just verified
+        if (!isEditing) {
+          const progressResult = await getArtistVerificationProgress(currentUser.uid);
+          if (progressResult.success) {
+            const { progress } = progressResult;
+            
+            if (progress.isVerified && progress.current === 3) {
+              // Artist just became verified with this upload
+              setBadgeNotification({
+                type: 'success',
+                title: '🎉 Congratulations!',
+                message: 'You are now a Verified Artist! Your profile will show the verified badge.',
+                duration: 8000
+              });
+            } else if (progress.remaining > 0) {
+              // Show progress notification
+              setBadgeNotification({
+                type: 'info',
+                title: 'Keep Going!',
+                message: `Upload ${progress.remaining} more artwork${progress.remaining !== 1 ? 's' : ''} to become a Verified Artist.`,
+                duration: 4000
+              });
+            }
+          }
+        }
+        
         await refreshUserProfile();
         onSuccess?.();
-        onClose();
+        
+        // Close modal after a delay if badge notification is shown
+        if (badgeNotification) {
+          setTimeout(onClose, 1000);
+        } else {
+          onClose();
+        }
       } else {
         setErrors({ submit: result.error });
       }
@@ -484,6 +518,13 @@ const ArtworkManagement = ({
           </div>
         </form>
       </div>
+      
+      {badgeNotification && (
+        <BadgeNotification
+          notification={badgeNotification}
+          onClose={() => setBadgeNotification(null)}
+        />
+      )}
     </div>
   );
 };

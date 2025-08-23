@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import VerifiedArtistBadge from '../VerifiedArtistBadge';
 import ProfileEdit from '../profile/ProfileEdit';
-import { getVerificationProgress } from '../../services/badgeService';
 
 const ArtistProfileOverview = () => {
-  const { userData, userArtworks, profileLoading } = useAuth();
+  const { userData, userArtworks, verificationProgress, profileLoading } = useAuth();
   const [showProfileEdit, setShowProfileEdit] = useState(false);
 
   if (profileLoading || !userData) {
@@ -39,7 +38,6 @@ const ArtistProfileOverview = () => {
   } = userData;
 
   const artworkCount = userArtworks?.length || 0;
-  const verificationProgress = getVerificationProgress({ artworkCount });
 
   const handleProfileEditSuccess = () => {
     console.log('Profile updated successfully');
@@ -142,7 +140,7 @@ const ArtistProfileOverview = () => {
                   </div>
                   <div className="bg-red-50 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-red-800">
-                      {isVerified ? '✓' : verificationProgress.percentage + '%'}
+                      {isVerified ? '✓' : (verificationProgress?.percentage || 0) + '%'}
                     </div>
                     <div className="text-sm text-red-600">
                       {isVerified ? 'Verified' : 'Progress'}
@@ -150,14 +148,14 @@ const ArtistProfileOverview = () => {
                   </div>
                 </div>
 
-                {!isVerified && verificationProgress.remaining > 0 && (
+                {!isVerified && verificationProgress && verificationProgress.remaining > 0 && (
                   <div className="bg-amber-50 rounded-lg p-4 mb-4">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium text-amber-900">
                         Verification Progress
                       </span>
                       <span className="text-xs text-amber-700">
-                        {verificationProgress.current}/{verificationProgress.target} artworks
+                        {verificationProgress?.current || 0}/{verificationProgress?.target || 3} artworks
                       </span>
                     </div>
                     <div className="w-full bg-amber-200 rounded-full h-2 mb-2">
@@ -165,11 +163,11 @@ const ArtistProfileOverview = () => {
                         className={`h-2 rounded-full transition-all duration-500 ${
                           verificationProgress.status === 'almost_there' ? 'bg-amber-500' : 'bg-amber-400'
                         }`}
-                        style={{ width: `${verificationProgress.percentage}%` }}
+                        style={{ width: `${verificationProgress?.percentage || 0}%` }}
                       ></div>
                     </div>
                     <p className="text-xs text-amber-700">
-                      Upload {verificationProgress.remaining} more artwork{verificationProgress.remaining !== 1 ? 's' : ''} to become a Verified Artist! 🎨
+                      Upload {verificationProgress?.remaining || 3} more artwork{(verificationProgress?.remaining || 3) !== 1 ? 's' : ''} to become a Verified Artist! 🎨
                     </p>
                   </div>
                 )}

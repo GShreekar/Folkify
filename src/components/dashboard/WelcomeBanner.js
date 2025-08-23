@@ -4,7 +4,7 @@ import ProfileEdit from '../profile/ProfileEdit';
 import ArtworkManagement from '../artwork/ArtworkManagement';
 
 const WelcomeBanner = () => {
-  const { userData, artistStats } = useAuth();
+  const { userData, artistStats, verificationProgress } = useAuth();
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [showArtworkForm, setShowArtworkForm] = useState(false);
 
@@ -32,6 +32,13 @@ const WelcomeBanner = () => {
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
                 <span className="text-sm opacity-80">Views: </span>
                 <span className="font-bold">{totalViews}</span>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
+                <span className="text-sm opacity-80">Status: </span>
+                <span className="font-bold">
+                  {userData?.isVerified ? '✓ Verified' : 
+                   verificationProgress?.current >= 2 ? '🟡 Almost There' : '🔄 In Progress'}
+                </span>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
                 <span className="text-sm opacity-80">Export: </span>

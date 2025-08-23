@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadArtworkImage, deleteArtworkImage } from './cloudinaryService';
+import { checkVerificationStatus, updateArtistWithBadge } from './badgeService';
 
 // Art form categories
 export const ART_FORMS = [
@@ -80,6 +81,38 @@ export const createArtwork = async (artistId, artworkData, imageFile = null) => 
     // Add to Firestore
     const artworksRef = collection(db, 'artworks');
     const docRef = await addDoc(artworksRef, artworkDoc);
+    
+    // Check and update artist verification status
+    try {
+      // Get current artist data
+      const artistDoc = await getDoc(doc(db, 'users', artistId));
+      if (artistDoc.exists()) {
+        const artistData = { id: artistId, ...artistDoc.data() };
+        
+        // Get all artist's artworks for verification check
+        const artistArtworksResult = await getUserArtworks(artistId);
+        const allArtistArtworks = artistArtworksResult.success ? artistArtworksResult.artworks : [];
+        
+        // Add the newly created artwork to the count
+        const updatedArtworks = [...allArtistArtworks, { id: docRef.id, ...artworkDoc }];
+        
+        // Check verification status
+        const verificationStatus = checkVerificationStatus(artistData, updatedArtworks);
+        
+        // Update artist if verification status changed
+        if (verificationStatus.verificationChanged) {
+          const updatedArtist = updateArtistWithBadge(artistData, verificationStatus);
+          await updateDoc(doc(db, 'users', artistId), {
+            isVerified: updatedArtist.isVerified,
+            verificationDate: updatedArtist.verificationDate || null,
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+    } catch (verificationError) {
+      console.error('Error updating verification status:', verificationError);
+      // Don't fail artwork creation if verification update fails
+    }
     
     return { 
       success: true, 
@@ -402,7 +435,47 @@ export const toggleArtworkLike = async (artworkId, isLiked) => {
 };
 
 /**
- * Get artist statistics
+ * Get artist verification progress
+ * @param {string} artistId - Artist's UID
+ * @returns {Promise<Object>} - Verification progress data
+ */
+export const getArtistVerificationProgress = async (artistId) => {
+  try {
+    // Get artist data
+    const artistDoc = await getDoc(doc(db, 'users', artistId));
+    if (!artistDoc.exists()) {
+      return { success: false, error: 'Artist not found' };
+    }
+    
+    const artistData = { id: artistId, ...artistDoc.data() };
+    
+    // Get artist's artworks
+    const artworksResult = await getUserArtworks(artistId);
+    const artworks = artworksResult.success ? artworksResult.artworks : [];
+    
+    // Calculate verification status
+    const verificationStatus = checkVerificationStatus(artistData, artworks);
+    
+    const progress = {
+      current: verificationStatus.artworkCount,
+      target: 3,
+      percentage: Math.min((verificationStatus.artworkCount / 3) * 100, 100),
+      remaining: verificationStatus.remainingArtworks,
+      isComplete: verificationStatus.shouldBeVerified,
+      isVerified: artistData.isVerified || false,
+      status: verificationStatus.shouldBeVerified ? 'verified' : 
+              verificationStatus.artworkCount >= 2 ? 'almost_there' : 'in_progress'
+    };
+    
+    return { success: true, progress };
+  } catch (error) {
+    console.error('Error getting verification progress:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Get artwork statistics for an artist
  * @param {string} artistId - Artist's UID
  * @returns {Promise<Object>} - Result with statistics
  */

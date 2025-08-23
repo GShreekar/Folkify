@@ -4,7 +4,7 @@ import {
   getCurrentUserData, 
   updateUserProfile
 } from '../firebase/auth';
-import { getUserArtworks, getArtistStats } from '../services/artworkService';
+import { getUserArtworks, getArtistStats, getArtistVerificationProgress } from '../services/artworkService';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const AuthContext = createContext();
@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [userArtworks, setUserArtworks] = useState([]);
   const [artistStats, setArtistStats] = useState(null);
+  const [verificationProgress, setVerificationProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
 
@@ -35,6 +36,11 @@ export const AuthProvider = ({ children }) => {
       const statsResult = await getArtistStats(uid);
       if (statsResult.success) {
         setArtistStats(statsResult.stats);
+      }
+      
+      const progressResult = await getArtistVerificationProgress(uid);
+      if (progressResult.success) {
+        setVerificationProgress(progressResult.progress);
       }
     } catch (error) {
       console.error('Error loading user artworks:', error);
@@ -91,6 +97,7 @@ export const AuthProvider = ({ children }) => {
         setUserData(null);
         setUserArtworks([]);
         setArtistStats(null);
+        setVerificationProgress(null);
       }
       
       setLoading(false);
@@ -104,6 +111,7 @@ export const AuthProvider = ({ children }) => {
     userData,
     userArtworks,
     artistStats,
+    verificationProgress,
     loading,
     profileLoading,
     refreshUserProfile,
