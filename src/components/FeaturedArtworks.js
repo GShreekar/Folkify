@@ -1,15 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAllArtworks } from '../services/artworkService';
+import ArtworkModal from './artwork/ArtworkModal';
 
 const FeaturedArtworks = () => {
-  const artworks = [];
+  const [artworks, setArtworks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
 
-  const getStyleColor = (style) => {
-    switch (style) {
-      case 'Warli': return 'text-amber-700 bg-amber-100';
-      case 'Madhubani': return 'text-red-700 bg-red-100';
-      case 'Pithora': return 'text-orange-700 bg-orange-100';
+  useEffect(() => {
+    const loadFeaturedArtworks = async () => {
+      try {
+        const result = await getAllArtworks({ 
+          limitCount: 6, 
+          orderField: 'views',
+          orderDirection: 'desc' 
+        });
+        if (result.success) {
+          setArtworks(result.artworks);
+        }
+      } catch (error) {
+        console.error('Error loading featured artworks:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFeaturedArtworks();
+  }, []);
+
+  const getStyleColor = (artForm) => {
+    switch (artForm) {
+      case 'Painting': return 'text-amber-700 bg-amber-100';
+      case 'Pottery': return 'text-red-700 bg-red-100';
+      case 'Textiles': return 'text-orange-700 bg-orange-100';
+      case 'Woodwork': return 'text-green-700 bg-green-100';
+      case 'Metalwork': return 'text-blue-700 bg-blue-100';
       default: return 'text-gray-700 bg-gray-100';
     }
+  };
+
+  const formatPrice = (price, currency = 'INR') => {
+    if (!price) return 'Price on request';
+    return `₹${price.toLocaleString()}`;
   };
 
   return (
@@ -26,38 +58,55 @@ const FeaturedArtworks = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-amber-600 to-red-600 mx-auto mt-6 rounded-full"></div>
         </div>
 
-        {artworks.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="text-amber-600 text-lg">Loading featured artworks...</div>
+          </div>
+        ) : artworks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {artworks.map((artwork) => (
               <div 
                 key={artwork.id} 
                 className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-100"
               >
-                <div className="aspect-square bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center text-8xl group-hover:scale-110 transition-transform duration-300">
-                  {artwork.image}
+                <div className="aspect-square overflow-hidden">
+                  {artwork.imageUrl ? (
+                    <img
+                      src={artwork.thumbnailUrl || artwork.imageUrl}
+                      alt={artwork.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+                      <span className="text-4xl">🎨</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStyleColor(artwork.style)}`}>
-                      {artwork.style}
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStyleColor(artwork.artForm)}`}>
+                      {artwork.artForm}
                     </span>
-                    <span className="text-2xl font-bold text-amber-900">{artwork.price}</span>
+                    <span className="text-lg font-bold text-green-600">{formatPrice(artwork.price, artwork.currency)}</span>
                   </div>
 
                   <h3 className="text-xl font-bold text-amber-900 mb-1">
                     {artwork.title}
                   </h3>
                   
-                  <p className="text-amber-700 font-medium mb-3">
-                    by {artwork.artist}
+                  <p className="text-amber-700 font-medium mb-3 text-sm">
+                    Artist ID: {artwork.artistId.substring(0, 8)}...
                   </p>
 
-                  <p className="text-sm text-amber-600 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <p className="text-sm text-amber-600 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
                     {artwork.description}
                   </p>
 
-                  <button className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200">
+                  <button 
+                    onClick={() => setSelectedArtwork(artwork)}
+                    className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200"
+                  >
                     View Details
                   </button>
                 </div>
@@ -65,15 +114,14 @@ const FeaturedArtworks = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 mb-12">
-            <div className="text-8xl mb-6">🎨</div>
-            <h3 className="text-2xl font-semibold text-amber-800 mb-4">
-              Beautiful Artworks Coming Soon
-            </h3>
-            <p className="text-amber-600 max-w-md mx-auto">
-              We're working with amazing folk artists to bring you authentic, handcrafted artworks. 
-              Stay tuned for our collection!
-            </p>
+          <div className="text-center py-12">
+            <div className="text-amber-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-amber-800 mb-2">No featured artworks yet</h3>
+            <p className="text-amber-600">Check back soon for amazing folk art!</p>
           </div>
         )}
 
@@ -83,6 +131,13 @@ const FeaturedArtworks = () => {
           </button>
         </div>
       </div>
+      
+      {selectedArtwork && (
+        <ArtworkModal
+          artwork={selectedArtwork}
+          onClose={() => setSelectedArtwork(null)}
+        />
+      )}
     </section>
   );
 };

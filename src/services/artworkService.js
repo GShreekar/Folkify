@@ -435,6 +435,53 @@ export const toggleArtworkLike = async (artworkId, isLiked) => {
 };
 
 /**
+ * Get all artists
+ * @param {Object} options - Query options
+ * @returns {Promise<Object>} - Result with artists array
+ */
+export const getAllArtists = async (options = {}) => {
+  try {
+    const {
+      limitCount = 50,
+      orderField = 'createdAt',
+      orderDirection = 'desc'
+    } = options;
+
+    let q = query(
+      collection(db, 'users'),
+      orderBy(orderField, orderDirection)
+    );
+
+    if (limitCount) {
+      q = query(q, limit(limitCount));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const artists = [];
+    
+    querySnapshot.forEach((doc) => {
+      const userData = doc.data();
+      artists.push({ 
+        id: doc.id,
+        ...userData
+      });
+    });
+
+    return { 
+      success: true, 
+      artists 
+    };
+  } catch (error) {
+    console.error('Error getting all artists:', error);
+    return { 
+      success: false, 
+      error: error.message, 
+      artists: [] 
+    };
+  }
+};
+
+/**
  * Get artist verification progress
  * @param {string} artistId - Artist's UID
  * @returns {Promise<Object>} - Verification progress data

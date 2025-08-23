@@ -198,9 +198,11 @@ const ArtworkManagement = ({
         await refreshUserProfile();
         onSuccess?.();
         
-        // Close modal after a delay if badge notification is shown
-        if (badgeNotification) {
-          setTimeout(onClose, 1000);
+        // Close modal after showing notification or immediately
+        if (badgeNotification?.duration) {
+          setTimeout(() => {
+            onClose();
+          }, 1500);
         } else {
           onClose();
         }

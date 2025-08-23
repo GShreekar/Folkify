@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getAllArtworks, getAllArtists } from '../../services/artworkService';
 import VerifiedArtistBadge from '../VerifiedArtistBadge';
+import ArtworkModal from '../artwork/ArtworkModal';
 
 const GalleryArtworksGrid = ({ filters }) => {
   const [artworks, setArtworks] = useState([]);
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
 
-  // TODO: Implement Firebase data fetching
   useEffect(() => {
     const fetchArtworksAndArtists = async () => {
       try {
-        // TODO: Replace with actual Firebase calls
+        const [artworkData, artistData] = await Promise.all([
+          getAllArtworks(),
+          getAllArtists()
+        ]);
         
-        setArtworks([]);
-        setArtists([]);
+        setArtworks(artworkData);
+        setArtists(artistData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -204,12 +209,12 @@ const GalleryArtworksGrid = ({ filters }) => {
                     <div className="text-2xl font-bold text-amber-900">
                       ₹{artwork.price.toLocaleString()}
                     </div>
-                    <Link
-                      to={`/gallery/artwork/${artwork.id}`}
+                    <button
+                      onClick={() => setSelectedArtwork(artwork)}
                       className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md"
                     >
                       View Details
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -228,6 +233,13 @@ const GalleryArtworksGrid = ({ filters }) => {
           </div>
         )}
       </div>
+      
+      {selectedArtwork && (
+        <ArtworkModal
+          artwork={selectedArtwork}
+          onClose={() => setSelectedArtwork(null)}
+        />
+      )}
     </section>
   );
 };

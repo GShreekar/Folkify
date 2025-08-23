@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import VerifiedArtistBadge from './VerifiedArtistBadge';
+import { getAllArtists } from '../services/artworkService';
 
 const MeetTheArtists = () => {
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // TODO: Implement Firebase data fetching
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        
-        setArtists([]);
+        const result = await getAllArtists({ 
+          limitCount: 6,
+          orderField: 'createdAt',
+          orderDirection: 'desc' 
+        });
+        if (result.success) {
+          // Filter artists who have uploaded artworks
+          const activeArtists = result.artists.filter(artist => 
+            artist.fullName && artist.primaryArtForm
+          );
+          setArtists(activeArtists);
+        }
       } catch (error) {
         console.error('Error fetching artists:', error);
       } finally {
@@ -21,11 +32,15 @@ const MeetTheArtists = () => {
     fetchArtists();
   }, []);
 
-  const getSpecialtyColor = (specialty) => {
-    if (specialty.includes('Warli')) return 'text-amber-700 bg-amber-100';
-    if (specialty.includes('Madhubani')) return 'text-red-700 bg-red-100';
-    if (specialty.includes('Pithora')) return 'text-orange-700 bg-orange-100';
-    return 'text-gray-700 bg-gray-100';
+  const getSpecialtyColor = (artForm) => {
+    switch (artForm) {
+      case 'Painting': return 'text-amber-700 bg-amber-100';
+      case 'Pottery': return 'text-red-700 bg-red-100';
+      case 'Textiles': return 'text-orange-700 bg-orange-100';
+      case 'Woodwork': return 'text-green-700 bg-green-100';
+      case 'Metalwork': return 'text-blue-700 bg-blue-100';
+      default: return 'text-gray-700 bg-gray-100';
+    }
   };
 
   return (
@@ -66,43 +81,46 @@ const MeetTheArtists = () => {
                   <div>
                     <div className="flex items-center justify-center space-x-2 mb-2">
                       <h3 className="text-xl font-bold text-amber-900">
-                        {artist.name}
+                        {artist.fullName || 'Anonymous Artist'}
                       </h3>
                       {artist.isVerified && (
                         <VerifiedArtistBadge size="xs" />
                       )}
                     </div>
                     <p className="text-amber-700 text-sm font-medium">
-                      {artist.location}
+                      {artist.village || 'Location not specified'}
                     </p>
                   </div>
 
                   <div className="flex justify-center">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSpecialtyColor(artist.specialty)}`}>
-                      {artist.specialty}
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSpecialtyColor(artist.primaryArtForm)}`}>
+                      {artist.primaryArtForm || 'Folk Art'}
                     </span>
                   </div>
 
                   <p className="text-sm text-amber-600 leading-relaxed">
-                    {artist.bio}
+                    {artist.bio?.substring(0, 80) + '...' || 'Passionate folk artist creating beautiful traditional art.'}
                   </p>
 
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-200">
                     <div>
-                      <div className="text-lg font-bold text-amber-900">{artist.artworkCount}</div>
-                      <div className="text-xs text-amber-600">Artworks</div>
+                      <div className="text-lg font-bold text-amber-900">{artist.yearsOfExperience || 5}</div>
+                      <div className="text-xs text-amber-600">Years Exp.</div>
                     </div>
                     <div>
                       <div className="text-lg font-bold text-amber-900 flex items-center justify-center">
-                        {artist.rating} ⭐
+                        {artist.isVerified ? '✓' : '⏳'}
                       </div>
-                      <div className="text-xs text-amber-600">Rating</div>
+                      <div className="text-xs text-amber-600">{artist.isVerified ? 'Verified' : 'Pending'}</div>
                     </div>
                   </div>
 
-                  <button className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-2 px-4 rounded-xl text-sm font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 mt-4">
+                  <Link
+                    to={`/artist/${artist.userId}`}
+                    className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-2 px-4 rounded-xl text-sm font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 mt-4 inline-block text-center"
+                  >
                     View Profile
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

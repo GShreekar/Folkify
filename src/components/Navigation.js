@@ -36,9 +36,6 @@ const Navigation = () => {
               <a href="#artists" className="text-amber-800 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                 Artists
               </a>
-              <a href="#workshops" className="text-amber-800 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
-                Workshops
-              </a>
               <a href="#about" className="text-amber-800 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200">
                 About Us
               </a>

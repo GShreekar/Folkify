@@ -8,6 +8,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/dashboard/Dashboard';
 import Gallery from './components/gallery/Gallery';
+import ArtistProfile from './components/ArtistProfile';
+import ArtworkDetail from './components/ArtworkDetail';
 import BadgeSystem from './components/BadgeSystem';
 import ExportComplianceChecklist from './components/ExportComplianceChecklist';
 import ExportComplianceDemo from './components/ExportComplianceDemo';
@@ -45,6 +47,8 @@ function App() {
               } 
             />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/artist/:artistId" element={<ArtistProfile />} />
+            <Route path="/artwork/:artworkId" element={<ArtworkDetail />} />
             <Route path="/badge-system" element={<BadgeSystem />} />
             <Route path="/export-compliance" element={<ExportComplianceChecklist />} />
             <Route path="/export-demo" element={<ExportComplianceDemo />} />
