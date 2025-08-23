@@ -1,114 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import VerifiedArtistBadge from '../VerifiedArtistBadge';
+import { mockArtworks, mockArtists } from '../../data/mockData';
 
 const GalleryArtworksGrid = ({ filters }) => {
-  // Mock data for artworks - in a real app, this would come from a database
-  const [artworks, setArtworks] = useState([
-    {
-      id: 1,
-      title: "Forest Spirits",
-      artist: "Jangarh Singh Shyam",
-      artform: "Gond",
-      region: "Madhya Pradesh",
-      price: 8500,
-      imageUrl: "/api/placeholder/400/500",
-      description: "Traditional Gond artwork depicting forest spirits and nature's harmony",
-      tags: ["forest", "spirits", "traditional"],
-      popularity: 120,
-      dateAdded: "2024-01-15"
-    },
-    {
-      id: 2,
-      title: "Village Life",
-      artist: "Sita Devi",
-      artform: "Madhubani",
-      region: "Bihar",
-      price: 12000,
-      imageUrl: "/api/placeholder/400/600",
-      description: "Vibrant Madhubani painting showcasing rural village life",
-      tags: ["village", "life", "colorful"],
-      popularity: 85,
-      dateAdded: "2024-01-20"
-    },
-    {
-      id: 3,
-      title: "Tribal Dance",
-      artist: "Bhuri Bai",
-      artform: "Warli",
-      region: "Maharashtra",
-      price: 6500,
-      imageUrl: "/api/placeholder/400/450",
-      description: "Dynamic Warli art capturing the essence of tribal celebrations",
-      tags: ["dance", "tribal", "celebration"],
-      popularity: 200,
-      dateAdded: "2024-01-18"
-    },
-    {
-      id: 4,
-      title: "Divine Horses",
-      artist: "Raman Soni",
-      artform: "Pithora",
-      region: "Gujarat",
-      price: 15000,
-      imageUrl: "/api/placeholder/400/550",
-      description: "Sacred Pithora painting featuring divine horses and blessings",
-      tags: ["horses", "divine", "blessing"],
-      popularity: 95,
-      dateAdded: "2024-01-22"
-    },
-    {
-      id: 5,
-      title: "Peacock Garden",
-      artist: "Malini Rajesh",
-      artform: "Kalamkari",
-      region: "Kerala",
-      price: 9800,
-      imageUrl: "/api/placeholder/400/480",
-      description: "Exquisite Kalamkari textile art with peacock motifs",
-      tags: ["peacock", "garden", "textile"],
-      popularity: 150,
-      dateAdded: "2024-01-25"
-    },
-    {
-      id: 6,
-      title: "Ocean Tales",
-      artist: "Chitrakar Kalam",
-      artform: "Patachitra",
-      region: "Odisha",
-      price: 7200,
-      imageUrl: "/api/placeholder/400/520",
-      description: "Traditional Patachitra scroll painting depicting ocean mythology",
-      tags: ["ocean", "mythology", "scroll"],
-      popularity: 110,
-      dateAdded: "2024-01-28"
-    },
-    {
-      id: 7,
-      title: "Desert Blooms",
-      artist: "Kiran Jangid",
-      artform: "Other",
-      region: "Rajasthan",
-      price: 11500,
-      imageUrl: "/api/placeholder/400/580",
-      description: "Contemporary folk art inspired by Rajasthani desert flowers",
-      tags: ["desert", "flowers", "contemporary"],
-      popularity: 75,
-      dateAdded: "2024-01-30"
-    },
-    {
-      id: 8,
-      title: "Golden Lotus",
-      artist: "Priya Nair",
-      artform: "Tanjore",
-      region: "Kerala",
-      price: 18000,
-      imageUrl: "/api/placeholder/400/500",
-      description: "Traditional Tanjore painting with gold leaf work and lotus motifs",
-      tags: ["lotus", "gold", "traditional"],
-      popularity: 180,
-      dateAdded: "2024-02-01"
-    }
-  ]);
+  // Use mock data for artworks and artists
+  const [artworks, setArtworks] = useState(mockArtworks);
+  const [artists, setArtists] = useState(mockArtists);
+
+  // Helper function to get artist data by name
+  const getArtistByName = (artistName) => {
+    return artists.find(artist => artist.name === artistName);
+  };
+
 
   const getFilteredArtworks = () => {
     let filtered = artworks;
@@ -253,6 +157,9 @@ const GalleryArtworksGrid = ({ filters }) => {
                       <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                     </svg>
                     <span>by {artwork.artist}</span>
+                    {getArtistByName(artwork.artist)?.isVerified && (
+                      <VerifiedArtistBadge size="xs" className="ml-2" />
+                    )}
                   </div>
                   
                   <div className="flex items-center text-sm text-amber-600 mb-4">

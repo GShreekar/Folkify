@@ -1,4 +1,5 @@
 import React from 'react';
+import VerifiedArtistBadge from '../VerifiedArtistBadge';
 
 const ArtistProfileOverview = ({ artistData }) => {
   // artistData will be fetched from database
@@ -7,7 +8,9 @@ const ArtistProfileOverview = ({ artistData }) => {
     bio = 'Bio will be loaded from database...',
     region = 'Region',
     artform = 'Art Form',
-    profilePicture = '👤'
+    profilePicture = '👤',
+    isVerified = false,
+    artworkCount = 0
   } = artistData || {};
 
   return (
@@ -26,8 +29,11 @@ const ArtistProfileOverview = ({ artistData }) => {
         <div className="flex-1">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-amber-900 mb-2">{name}</h2>
-              
+              <div className="flex items-center space-x-3 mb-2">
+                <h2 className="text-2xl font-bold text-amber-900">{name}</h2>
+                {isVerified && <VerifiedArtistBadge size="md" />}
+              </div>
+
               <div className="flex items-center space-x-2 mb-3">
                 <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
                   {artform}

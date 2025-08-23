@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import mockDB from '../../services/mockDatabaseService';
 
-const MyArtworksSection = ({ artworks = [] }) => {
+const MyArtworksSection = ({ artworks = [], artistData, onArtistUpdate }) => {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadFormData, setUploadFormData] = useState({
     title: '',
@@ -31,17 +32,50 @@ const MyArtworksSection = ({ artworks = [] }) => {
     }));
   };
 
-  const handleUploadSubmit = (e) => {
+  const handleUploadSubmit = async (e) => {
     e.preventDefault();
-    console.log('Artwork upload:', uploadFormData);
-    setShowUploadForm(false);
-    setUploadFormData({
-      title: '',
-      description: '',
-      artform: '',
-      image: null,
-      price: ''
-    });
+
+    try {
+      // Simulate artwork upload with artist data
+      const artworkData = {
+        ...uploadFormData,
+        artistId: artistData?.id || 1, // Default to artist ID 1 for demo
+        artist: artistData?.name || 'Current Artist',
+        region: artistData?.region || 'Unknown Region'
+      };
+
+      console.log('Uploading artwork:', artworkData);
+
+      // Add artwork and check verification status
+      const result = await mockDB.addArtwork(artworkData);
+
+      if (result.verificationChanged) {
+        console.log(`🎉 Artist verification status changed! Now verified: ${result.artist.isVerified}`);
+
+        // Show notification about verification status change
+        if (result.artist.isVerified) {
+          alert('🎉 Congratulations! You are now a Verified Artist with 3+ artworks!');
+        }
+
+        // Update parent component with new artist data
+        if (onArtistUpdate) {
+          onArtistUpdate(result.artist);
+        }
+      }
+
+      setShowUploadForm(false);
+      setUploadFormData({
+        title: '',
+        description: '',
+        artform: '',
+        image: null,
+        price: ''
+      });
+
+    } catch (error) {
+      console.error('Error uploading artwork:', error);
+      alert('Error uploading artwork. Please try again.');
+    }
   };
 
   return (
