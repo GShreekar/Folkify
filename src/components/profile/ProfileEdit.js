@@ -1,10 +1,37 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ART_FORMS } from '../../constants/artForms';
 import '../FolkArtAnimations.css';
 
 const ProfileEdit = ({ onClose, onSuccess }) => {
   const { userData, updateProfile, profileLoading } = useAuth();
+  
+  // Create or get modal root element
+  useEffect(() => {
+    let modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) {
+      modalRoot = document.createElement('div');
+      modalRoot.id = 'modal-root';
+      modalRoot.style.position = 'fixed';
+      modalRoot.style.top = '0';
+      modalRoot.style.left = '0';
+      modalRoot.style.width = '100%';
+      modalRoot.style.height = '100%';
+      modalRoot.style.zIndex = '999999';
+      modalRoot.style.pointerEvents = 'none';
+      document.body.appendChild(modalRoot);
+    }
+    
+    return () => {
+      // Clean up when component unmounts
+      const root = document.getElementById('modal-root');
+      if (root && root.childElementCount === 0) {
+        document.body.removeChild(root);
+      }
+    };
+  }, []);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
@@ -42,6 +69,32 @@ const ProfileEdit = ({ onClose, onSuccess }) => {
       });
     }
   }, [userData]);
+
+  // Handle ESC key press and body scroll prevention
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+    
+    // Ensure no other elements can be above our modal
+    document.body.style.position = 'relative';
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+      document.body.style.position = '';
+    };
+  }, [onClose]);
+
+  // Handle click outside to close
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -115,267 +168,278 @@ const ProfileEdit = ({ onClose, onSuccess }) => {
   };
 
   if (profileLoading) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl p-6">
+    const modalRoot = document.getElementById('modal-root') || document.body;
+    return createPortal(
+      <div 
+        className="modal-popup fixed inset-0 bg-black/50 flex items-center justify-center animate-fade-in"
+        style={{ zIndex: 999999, pointerEvents: 'auto' }}
+      >
+        <div className="bg-white rounded-xl p-6 m-4 shadow-2xl animate-scale-in">
           <div className="flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-600"></div>
             <span className="text-amber-800">Loading profile...</span>
           </div>
         </div>
-      </div>
+      </div>,
+      modalRoot
     );
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 folk-art-background">
-      {/* Mandala Patterns */}
-      <div className="mandala-pattern mandala-1"></div>
-      <div className="mandala-pattern mandala-2"></div>
-      
-      {/* Warli Art Figures */}
-      <div className="warli-figure warli-1">
-        <div className="warli-arms"></div>
-        <div className="warli-legs"></div>
-      </div>
-      <div className="warli-figure warli-2">
-        <div className="warli-arms"></div>
-        <div className="warli-legs"></div>
-      </div>
-      
-      {/* Geometric Patterns */}
-      <div className="geometric-pattern geo-1"></div>
-      
-      <div className="relative z-10 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-amber-200/50 folk-content-overlay">
-        <div className="sticky top-0 bg-white rounded-t-3xl border-b border-amber-200 p-6">
+  const modalRoot = document.getElementById('modal-root') || document.body;
+  return createPortal(
+    <div 
+      className="modal-backdrop modal-popup fixed inset-0 bg-black/50 flex items-center justify-center p-1 xs:p-2 sm:p-4 animate-fade-in"
+      onClick={handleOverlayClick}
+      style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0, 
+        zIndex: 999999,
+        pointerEvents: 'auto'
+      }}
+    >
+      <div 
+        className="modal-content relative bg-white/95 backdrop-blur-sm rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-[95vw] xs:max-w-3xl sm:max-w-5xl max-h-[95vh] xs:max-h-[90vh] overflow-hidden border border-amber-200/50 animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+        style={{ zIndex: 100000 }}
+      >
+        <div className="sticky top-0 bg-white/90 backdrop-blur-sm rounded-t-xl xs:rounded-t-2xl sm:rounded-t-3xl border-b border-amber-200 p-3 xs:p-4 sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-amber-800">Edit Profile</h2>
+            <h2 className="text-lg xs:text-xl sm:text-2xl font-bold text-amber-800">✏️ Edit Profile</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              className="modal-close-button text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 text-lg xs:text-xl sm:text-2xl font-bold"
+              aria-label="Close modal"
             >
               ×
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-amber-800">Basic Information</h3>
-            
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl border ${
-                  errors.fullName ? 'border-red-400' : 'border-amber-300'
-                } focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200`}
-                placeholder="Enter your full name"
-              />
-              {errors.fullName && (
-                <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
-              )}
+        <div className="overflow-y-auto max-h-[calc(95vh-60px)] xs:max-h-[calc(90vh-80px)] sm:max-h-[calc(90vh-92px)]">
+          <form onSubmit={handleSubmit} className="p-3 xs:p-4 sm:p-6 space-y-4 xs:space-y-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-3 xs:space-y-4">
+              <h3 className="text-sm xs:text-base sm:text-lg font-semibold text-amber-800">Basic Information</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className={`w-full px-3 xs:px-4 py-2.5 xs:py-3 rounded-xl border ${
+                    errors.fullName ? 'border-red-400' : 'border-amber-300'
+                  } focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm xs:text-base touch-manipulation`}
+                  placeholder="Enter your full name"
+                />
+                {errors.fullName && (
+                  <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border ${
+                    errors.phoneNumber ? 'border-red-400' : 'border-amber-300'
+                  } focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base`}
+                  placeholder="Enter your phone number"
+                />
+                {errors.phoneNumber && (
+                  <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Primary Art Form *
+                </label>
+                <select
+                  name="primaryArtForm"
+                  value={formData.primaryArtForm}
+                  onChange={handleChange}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border ${
+                    errors.primaryArtForm ? 'border-red-400' : 'border-amber-300'
+                  } focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base`}
+                >
+                  {ART_FORMS.map(form => (
+                    <option key={form.value} value={form.value} disabled={form.disabled}>
+                      {form.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.primaryArtForm && (
+                  <p className="text-red-500 text-xs mt-1">{errors.primaryArtForm}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Village/Region
+                </label>
+                <input
+                  type="text"
+                  name="village"
+                  value={formData.village}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base"
+                  placeholder="Your village or region"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Phone Number *
-              </label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl border ${
-                  errors.phoneNumber ? 'border-red-400' : 'border-amber-300'
-                } focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200`}
-                placeholder="Enter your phone number"
-              />
-              {errors.phoneNumber && (
-                <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>
-              )}
+            <div className="space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold text-amber-800">Professional Information</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Years of Experience
+                </label>
+                <input
+                  type="number"
+                  name="yearsOfExperience"
+                  value={formData.yearsOfExperience}
+                  onChange={handleChange}
+                  min="0"
+                  max="100"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base"
+                  placeholder="Years of experience in art"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Specialization
+                </label>
+                <input
+                  type="text"
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base"
+                  placeholder="e.g., Traditional motifs, Contemporary fusion, etc."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Bio
+                </label>
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleChange}
+                  rows="4"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 resize-none text-sm sm:text-base"
+                  placeholder="Tell us about your artistic background and journey..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Awards and Recognition
+                </label>
+                <textarea
+                  name="awardsAndRecognition"
+                  value={formData.awardsAndRecognition}
+                  onChange={handleChange}
+                  rows="3"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 resize-none text-sm sm:text-base"
+                  placeholder="List any awards, exhibitions, or recognition received..."
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Primary Art Form *
-              </label>
-              <select
-                name="primaryArtForm"
-                value={formData.primaryArtForm}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl border ${
-                  errors.primaryArtForm ? 'border-red-400' : 'border-amber-300'
-                } focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200`}
+            <div className="space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold text-amber-800">Social Media & Online Presence</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Instagram Profile
+                </label>
+                <input
+                  type="url"
+                  name="socialMedia.instagram"
+                  value={formData.socialMedia.instagram}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base"
+                  placeholder="https://instagram.com/yourusername"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Facebook Profile
+                </label>
+                <input
+                  type="url"
+                  name="socialMedia.facebook"
+                  value={formData.socialMedia.facebook}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base"
+                  placeholder="https://facebook.com/yourusername"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-800 mb-2">
+                  Website/Portfolio
+                </label>
+                <input
+                  type="url"
+                  name="socialMedia.website"
+                  value={formData.socialMedia.website}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 text-sm sm:text-base"
+                  placeholder="https://yourwebsite.com"
+                />
+              </div>
+            </div>
+
+            {errors.submit && (
+              <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-xl text-sm">
+                {errors.submit}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200 text-sm sm:text-base"
               >
-                {ART_FORMS.map(form => (
-                  <option key={form.value} value={form.value} disabled={form.disabled}>
-                    {form.label}
-                  </option>
-                ))}
-              </select>
-              {errors.primaryArtForm && (
-                <p className="text-red-500 text-xs mt-1">{errors.primaryArtForm}</p>
-              )}
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm sm:text-base ${
+                  isSubmitting
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-amber-600 to-red-600 text-white hover:from-amber-700 hover:to-red-700 transform hover:scale-105'
+                }`}
+              >
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </button>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Village/Region
-              </label>
-              <input
-                type="text"
-                name="village"
-                value={formData.village}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                placeholder="Your village or region"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-amber-800">Professional Information</h3>
-            
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Years of Experience
-              </label>
-              <input
-                type="number"
-                name="yearsOfExperience"
-                value={formData.yearsOfExperience}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                placeholder="Years of experience in art"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Specialization
-              </label>
-              <input
-                type="text"
-                name="specialization"
-                value={formData.specialization}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                placeholder="e.g., Traditional motifs, Contemporary fusion, etc."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleChange}
-                rows="4"
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 resize-none"
-                placeholder="Tell us about your artistic background and journey..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Awards and Recognition
-              </label>
-              <textarea
-                name="awardsAndRecognition"
-                value={formData.awardsAndRecognition}
-                onChange={handleChange}
-                rows="3"
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200 resize-none"
-                placeholder="List any awards, exhibitions, or recognition received..."
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-amber-800">Social Media & Online Presence</h3>
-            
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Instagram Profile
-              </label>
-              <input
-                type="url"
-                name="socialMedia.instagram"
-                value={formData.socialMedia.instagram}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                placeholder="https://instagram.com/yourusername"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Facebook Profile
-              </label>
-              <input
-                type="url"
-                name="socialMedia.facebook"
-                value={formData.socialMedia.facebook}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                placeholder="https://facebook.com/yourusername"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-amber-800 mb-2">
-                Website/Portfolio
-              </label>
-              <input
-                type="url"
-                name="socialMedia.website"
-                value={formData.socialMedia.website}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
-                placeholder="https://yourwebsite.com"
-              />
-            </div>
-          </div>
-
-          {errors.submit && (
-            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-xl text-sm">
-              {errors.submit}
-            </div>
-          )}
-
-          <div className="flex space-x-4 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-amber-600 to-red-600 text-white hover:from-amber-700 hover:to-red-700 transform hover:scale-105'
-              }`}
-            >
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </div>,
+    modalRoot
   );
 };
 

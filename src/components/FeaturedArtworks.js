@@ -37,7 +37,7 @@ const FeaturedArtworks = () => {
   };
 
   return (
-    <section id="explore" className="py-16 folk-art-background relative overflow-hidden">
+    <section id="explore" className="py-12 sm:py-16 folk-art-background relative overflow-hidden">
       {/* Enhanced Folk Art Elements */}
       <div className="mandala-pattern mandala-1"></div>
       <div className="mandala-pattern mandala-2"></div>
@@ -243,37 +243,39 @@ const FeaturedArtworks = () => {
         </svg>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-white mb-4 relative">
-            Featured Artworks
-            <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 opacity-30">
+            {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 relative">
+            ✨ Featured Artworks ✨
+            <span className="absolute -top-6 sm:-top-8 left-1/2 transform -translate-x-1/2 w-12 h-12 sm:w-16 sm:h-16 opacity-30">
               <svg viewBox="0 0 60 60" fill="none" className="text-yellow-200 animate-twinkle">
                 <polygon points="30,5 35,20 50,20 38,30 42,45 30,37 18,45 22,30 10,20 25,20" fill="currentColor"/>
               </svg>
             </span>
           </h2>
-          <p className="text-xl text-orange-100 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-orange-100 max-w-3xl mx-auto px-4">
             Handpicked masterpieces from our talented artists, each telling a unique story 
             of India's rich folk art traditions.
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-300 to-white mx-auto mt-6 rounded-full relative">
+          <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-yellow-300 to-white mx-auto mt-4 sm:mt-6 rounded-full relative">
             <div className="absolute -left-2 -top-1 w-3 h-3 bg-yellow-300 rounded-full animate-bounce"></div>
             <div className="absolute -right-2 -top-1 w-3 h-3 bg-white rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64 mb-12">
+          <div className="flex justify-center items-center h-64 mb-8 sm:mb-12">
             <LoadingSpinner />
           </div>
         ) : artworks.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-8 sm:mb-12">
             {artworks.map((artwork) => (
               <Link 
                 to={`/artwork/${artwork.id}`}
                 key={artwork.id} 
-                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-100"
+                className="group bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-amber-100"
               >
                 <div className="aspect-square bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center relative overflow-hidden">
                   {artwork.imageUrl || artwork.thumbnailUrl ? (
@@ -286,37 +288,37 @@ const FeaturedArtworks = () => {
                       }}
                     />
                   ) : (
-                    <div className="text-8xl text-amber-400">🎨</div>
+                    <div className="text-6xl sm:text-8xl text-amber-400">🎨</div>
                   )}
                 </div>
 
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getArtFormColor(artwork.artForm)}`}>
+                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold ${getArtFormColor(artwork.artForm)}`}>
                       {artwork.artForm}
                     </span>
                     {artwork.isForSale && artwork.price && (
-                      <span className="text-2xl font-bold text-amber-900">
+                      <span className="text-lg sm:text-2xl font-bold text-amber-900">
                         ₹{artwork.price.toLocaleString()}
                       </span>
                     )}
                   </div>
 
-                  <h3 className="text-xl font-bold text-amber-900 mb-1">
+                  <h3 className="text-lg sm:text-xl font-bold text-amber-900 mb-1">
                     {artwork.title}
                   </h3>
 
-                  <p className="text-amber-700 font-medium mb-3">
+                  <p className="text-amber-700 font-medium mb-3 text-sm sm:text-base">
                     {artwork.yearCreated && `Created in ${artwork.yearCreated}`}
                   </p>
 
                   {artwork.description && (
-                    <p className="text-sm text-amber-600 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
+                    <p className="text-xs sm:text-sm text-amber-600 mb-3 sm:mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
                       {artwork.description}
                     </p>
                   )}
 
-                  <button className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200">
+                  <button className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-2 sm:py-3 px-4 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base">
                     View Details
                   </button>
                 </div>

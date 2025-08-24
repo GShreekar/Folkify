@@ -702,28 +702,105 @@
 
 @media (max-width: 768px) {
   .mandala-pattern {
-    width: 120px;
-    height: 120px;
-  }
-  
-  .mandala-pattern::before {
     width: 80px;
     height: 80px;
   }
   
+  .mandala-pattern::before {
+    width: 60px;
+    height: 60px;
+  }
+  
   .mandala-pattern::after {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .warli-figure {
+    width: 25px;
+    height: 35px;
+  }
+  
+  .geometric-pattern {
+    width: 50px;
+    height: 50px;
+  }
+
+  .warli-tree {
+    width: 40px;
+    height: 60px;
+  }
+
+  .warli-peacock {
+    width: 60px;
+    height: 45px;
+  }
+
+  .warli-celebration {
+    width: 80px;
+    height: 80px;
+  }
+
+  .mandala-complex {
+    width: 100px;
+    height: 100px;
+  }
+
+  .tribal-pattern {
+    width: 70px;
+    height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mandala-pattern {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .mandala-pattern::before {
     width: 40px;
     height: 40px;
   }
   
+  .mandala-pattern::after {
+    width: 20px;
+    height: 20px;
+  }
+  
   .warli-figure {
-    width: 30px;
-    height: 45px;
+    width: 20px;
+    height: 30px;
   }
   
   .geometric-pattern {
+    width: 40px;
+    height: 40px;
+  }
+
+  .warli-tree {
+    width: 30px;
+    height: 45px;
+  }
+
+  .warli-peacock {
+    width: 45px;
+    height: 35px;
+  }
+
+  .warli-celebration {
     width: 60px;
     height: 60px;
+  }
+
+  .mandala-complex {
+    width: 80px;
+    height: 80px;
+  }
+
+  .tribal-pattern {
+    width: 50px;
+    height: 25px;
   }
 }
 
@@ -733,11 +810,88 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  margin: 20px;
-  padding: 40px;
+  margin: 16px;
+  padding: 24px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.3);
   overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .folk-content-overlay {
+    margin: 20px;
+    padding: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .folk-content-overlay {
+    margin: 24px;
+    padding: 40px;
+  }
+}
+
+/* Modal Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Enhanced mobile modal styles */
+@media (max-width: 474px) {
+  .animate-scale-in {
+    animation: scale-in 0.25s ease-out;
+  }
+}
+
+/* Touch-friendly close button */
+@media (hover: none) and (pointer: coarse) {
+  .modal-close-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Prevent unwanted zoom on mobile inputs */
+@media screen and (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Improve modal backdrop on mobile */
+@media (max-width: 474px) {
+  .modal-backdrop {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .folk-content-overlay::before {
@@ -970,11 +1124,37 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  z-index: 9999 !important;
+  z-index: 99999 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 1rem !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure modal content is above everything */
+/* Ensure modal content is above everything */
+.modal-content {
+  position: relative !important;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
+}
+
+/* Modal root container */
+#modal-root {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#modal-root > * {
+  pointer-events: auto !important;
 }
 
 .modal-backdrop {
@@ -984,18 +1164,34 @@
   right: 0 !important;
   bottom: 0 !important;
   background: rgba(0, 0, 0, 0.5) !important;
-  z-index: 1 !important;
+  z-index: 999999 !important;
+  overflow: hidden !important;
 }
 
+/* Ensure modal content can scroll smoothly */
 .modal-content {
   position: relative !important;
   background: rgba(255, 255, 255, 0.95) !important;
   border-radius: 1.5rem !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-  backdrop-filter: blur(8px) !important;
-  max-width: 56rem !important;
-  width: 100% !important;
-  max-height: 90vh !important;
-  overflow: hidden !important;
-  z-index: 2 !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #d97706 #f3f4f6 !important;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #d97706;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #b45309;
 }

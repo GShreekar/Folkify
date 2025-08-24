@@ -9,7 +9,8 @@ import {
   getDoc, 
   updateDoc, 
   deleteDoc,
-  limit
+  limit,
+  startAfter
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadArtworkImage, deleteArtworkImage } from './cloudinaryService';
@@ -300,7 +301,8 @@ export const getAllArtworks = async (options = {}) => {
       limitCount = 50,
       artForm = null,
       orderField = 'createdAt',
-      orderDirection = 'desc'
+      orderDirection = 'desc',
+      lastDoc = null // For pagination
     } = options;
 
     let q = query(
@@ -315,29 +317,47 @@ export const getAllArtworks = async (options = {}) => {
     q = query(q, orderBy(orderField, orderDirection));
 
     if (limitCount) {
-      q = query(q, limit(limitCount));
+      q = query(q, limit(limitCount + 1)); // Get one extra to check if there are more
+    }
+
+    if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
     }
 
     const querySnapshot = await getDocs(q);
     const artworks = [];
+    let lastDocument = null;
+    let hasMore = false;
     
-    querySnapshot.forEach((doc) => {
+    const docs = querySnapshot.docs;
+    
+    // Check if we have more items than requested
+    if (docs.length > limitCount) {
+      hasMore = true;
+      docs.pop(); // Remove the extra document
+    }
+    
+    docs.forEach((doc) => {
       artworks.push({ 
         id: doc.id, 
         ...doc.data() 
       });
+      lastDocument = doc; // Keep reference to last document
     });
 
     return { 
       success: true, 
-      artworks 
+      artworks,
+      lastDoc: lastDocument,
+      hasMore
     };
   } catch (error) {
     console.error('Error getting all artworks:', error);
     return { 
       success: false, 
       error: error.message, 
-      artworks: [] 
+      artworks: [],
+      hasMore: false
     };
   }
 };

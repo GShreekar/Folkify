@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 const GalleryCallToAction = () => {
   return (
@@ -51,25 +50,6 @@ const GalleryCallToAction = () => {
               <div className="text-4xl md:text-5xl font-bold text-yellow-200 mb-2">28</div>
               <div className="text-amber-100 text-lg">States Represented</div>
             </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-            <Link
-              to="/gallery"
-              className="bg-white text-amber-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-50 transform hover:scale-105 transition-all duration-300 shadow-xl border-2 border-white"
-            >
-              Explore More Artworks
-              <svg className="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-            
-            <Link
-              to="/register"
-              className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-amber-800 transform hover:scale-105 transition-all duration-300"
-            >
-              Become an Artist Partner
-            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">

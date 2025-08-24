@@ -11,11 +11,7 @@ import {
   getDoc, 
   updateDoc, 
   collection, 
-  addDoc, 
-  query, 
-  where, 
-  getDocs, 
-  orderBy 
+  addDoc
 } from 'firebase/firestore';
 import { auth, db } from './config';
 import { getUserArtworks as getArtworksFromService, getArtistStats as getStatsFromService } from '../services/artworkService';

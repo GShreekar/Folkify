@@ -55,7 +55,6 @@ const WelcomeBanner = () => {
 
       {showProfileEdit && (
         <ProfileEdit
-          isOpen={showProfileEdit}
           onClose={() => setShowProfileEdit(false)}
         />
       )}

@@ -50,9 +50,9 @@ const GalleryFilters = ({ onFiltersChange }) => {
   };
 
   return (
-    <section className="py-8 bg-white/80 backdrop-blur-sm sticky top-0 z-40 border-b border-amber-200">
+    <section className="py-6 sm:py-8 bg-white/80 backdrop-blur-sm sticky top-0 z-40 border-b border-amber-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
+        <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row justify-between items-center gap-6">
           {/* Search Bar */}
           <div className="w-full lg:w-1/3">
             <div className="relative">
@@ -61,7 +61,7 @@ const GalleryFilters = ({ onFiltersChange }) => {
                 placeholder="Search artworks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 pl-10 border border-amber-200 rounded-lg bg-white text-amber-800 placeholder-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-4 py-2 pl-10 pr-10 border border-amber-200 rounded-lg bg-white text-amber-800 placeholder-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base"
               />
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500">
                 🔍
@@ -78,30 +78,30 @@ const GalleryFilters = ({ onFiltersChange }) => {
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 flex-1 justify-center">
+          <div className="flex flex-wrap gap-2 flex-1 justify-center px-2">
             {categories.slice(0, 6).map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleCategoryChange(category.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
                   filters.artform === category.id
                     ? 'bg-gradient-to-r from-amber-600 to-red-600 text-white shadow-lg'
                     : 'bg-white text-amber-700 border border-amber-200 hover:bg-amber-50'
                 }`}
               >
-                <span className="mr-2">{category.emoji}</span>
-                {category.name}
+                <span className="mr-1 sm:mr-2">{category.emoji}</span>
+                <span className="hidden xs:inline">{category.name}</span>
               </button>
             ))}
           </div>
 
           {/* Sort Options */}
-          <div className="flex items-center gap-4">
-            <label className="text-amber-800 font-medium">Sort by:</label>
+          <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-center">
+            <label className="text-amber-800 font-medium text-sm sm:text-base whitespace-nowrap">Sort by:</label>
             <select
               value={filters.sort}
               onChange={(e) => handleFilterChange('sort', e.target.value)}
-              className="px-4 py-2 border border-amber-200 rounded-lg bg-white text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="px-3 sm:px-4 py-2 border border-amber-200 rounded-lg bg-white text-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base min-w-0 flex-1 sm:flex-initial"
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -115,7 +115,7 @@ const GalleryFilters = ({ onFiltersChange }) => {
         {/* Active Filters Display */}
         {(filters.artform !== 'all' || filters.search) && (
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm text-amber-700">Active filters:</span>
+            <span className="text-xs sm:text-sm text-amber-700">Active filters:</span>
             {filters.artform !== 'all' && (
               <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-medium flex items-center">
                 {categories.find(c => c.id === filters.artform)?.name}

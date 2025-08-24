@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { createArtwork, updateArtwork, getArtistVerificationProgress } from '../../services/artworkService';
 import { ART_FORMS } from '../../constants/artForms';
@@ -8,12 +9,60 @@ import '../FolkArtAnimations.css';
 const ArtworkForm = ({ 
   isOpen, 
   onClose, 
-  artwork = null, 
-  onSuccess 
+  onSubmit,
+  artwork = null
 }) => {
   const { currentUser, refreshUserProfile } = useAuth();
+  const [isModalReady, setIsModalReady] = useState(false);
   const fileInputRef = useRef(null);
   const formRef = useRef(null);
+  
+  // Create modal root synchronously before render
+  useLayoutEffect(() => {
+    if (isOpen) {
+      let modalRoot = document.getElementById('modal-root');
+      if (!modalRoot) {
+        modalRoot = document.createElement('div');
+        modalRoot.id = 'modal-root';
+        modalRoot.style.position = 'fixed';
+        modalRoot.style.top = '0';
+        modalRoot.style.left = '0';
+        modalRoot.style.width = '100%';
+        modalRoot.style.height = '100%';
+        modalRoot.style.zIndex = '999999';
+        modalRoot.style.pointerEvents = 'none';
+        modalRoot.style.display = 'flex';
+        modalRoot.style.alignItems = 'center';
+        modalRoot.style.justifyContent = 'center';
+        document.body.appendChild(modalRoot);
+      }
+      
+      // Ensure modal root is properly configured and force ready state
+      modalRoot.style.display = 'flex';
+      modalRoot.style.alignItems = 'center';
+      modalRoot.style.justifyContent = 'center';
+      
+      // Set modal ready state after DOM is updated
+      requestAnimationFrame(() => {
+        setIsModalReady(true);
+      });
+    } else {
+      setIsModalReady(false);
+    }
+  }, [isOpen]);
+
+  // Manage body scroll and cleanup
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
   
   const [formData, setFormData] = useState({
     title: artwork?.title || '',
@@ -36,16 +85,31 @@ const ArtworkForm = ({
 
   const isEditing = !!artwork;
 
-  // Scroll to form when it opens
+  // Handle ESC key and body scroll prevention
   useEffect(() => {
-    if (isOpen && formRef.current) {
-      formRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start',
-        inline: 'nearest'
-      });
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'relative';
+      
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'unset';
+        document.body.style.position = '';
+      };
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
+
+  // Handle click outside to close
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -208,7 +272,6 @@ const ArtworkForm = ({
         }
         
         await refreshUserProfile();
-        onSuccess?.();
         
         // Close form after showing notification or immediately
         if (badgeNotification?.duration) {
@@ -229,24 +292,48 @@ const ArtworkForm = ({
     }
   };
 
-  return (
-    <div ref={formRef} className="relative bg-gradient-to-br from-amber-50 via-white to-orange-50 rounded-3xl shadow-2xl border-2 border-amber-200/50 mb-8 overflow-hidden max-w-5xl mx-auto">
-      {/* Folk Art Background Elements */}
-      <div className="absolute inset-0 overflow-hidden opacity-10">
-        {/* Mandala Patterns */}
-        <div className="mandala-pattern mandala-1" style={{ top: '-10%', left: '-10%', width: '150px', height: '150px' }}></div>
-        <div className="mandala-pattern mandala-2" style={{ top: '20%', right: '-5%', width: '120px', height: '120px' }}></div>
-        
-        {/* Warli Art Figures */}
-        <div className="warli-figure warli-1" style={{ bottom: '10%', left: '5%', width: '80px', height: '80px' }}>
-          <div className="warli-arms"></div>
-          <div className="warli-legs"></div>
+  if (!isOpen || !isModalReady) return null;
+
+  const modalRoot = document.getElementById('modal-root') || document.body;
+  return createPortal(
+    <div 
+      className="modal-backdrop modal-popup fixed inset-0 bg-black/50 p-1 xs:p-2 sm:p-4 animate-fade-in"
+      onClick={handleOverlayClick}
+      style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0, 
+        zIndex: 999999,
+        pointerEvents: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <div 
+        ref={formRef} 
+        className="modal-content relative bg-gradient-to-br from-amber-50 via-white to-orange-50 rounded-2xl xs:rounded-3xl shadow-2xl border-2 border-amber-200/50 w-full max-w-[95vw] xs:max-w-3xl sm:max-w-5xl max-h-[95vh] xs:max-h-[90vh] overflow-y-auto animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+        style={{ zIndex: 999999 }}
+      >
+        {/* Decorative elements inside form */}
+        <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
+          {/* Mandala Patterns */}
+          <div className="mandala-pattern mandala-1" style={{ top: '-10%', left: '-10%', width: '150px', height: '150px' }}></div>
+          <div className="mandala-pattern mandala-2" style={{ top: '20%', right: '-5%', width: '120px', height: '120px' }}></div>
+          
+          {/* Warli Art Figures */}
+          <div className="warli-figure warli-1" style={{ bottom: '10%', left: '5%', width: '80px', height: '80px' }}>
+            <div className="warli-arms"></div>
+            <div className="warli-legs"></div>
+          </div>
+          
+          {/* Geometric Patterns */}
+          <div className="geometric-pattern geo-1" style={{ top: '50%', left: '2%', width: '60px', height: '60px' }}></div>
+          <div className="geometric-pattern geo-2" style={{ bottom: '30%', right: '3%', width: '70px', height: '70px' }}></div>
         </div>
-        
-        {/* Geometric Patterns */}
-        <div className="geometric-pattern geo-1" style={{ top: '50%', left: '2%', width: '60px', height: '60px' }}></div>
-        <div className="geometric-pattern geo-2" style={{ bottom: '30%', right: '3%', width: '70px', height: '70px' }}></div>
-      </div>
 
       {/* Header Section with Folk Art Border */}
       <div className="relative z-10 bg-gradient-to-r from-amber-600 to-red-600 text-white p-8">
@@ -578,11 +665,11 @@ const ArtworkForm = ({
 
           {/* Action Buttons with Enhanced Styling */}
           <div className="bg-white/70 backdrop-blur-sm rounded-xl p-8 border border-amber-200/50 shadow-md">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
                 type="button"
                 onClick={onClose}
-                className="group flex-1 max-w-xs px-8 py-4 border-2 border-amber-300 text-amber-700 rounded-xl font-bold text-lg hover:bg-amber-50 hover:border-amber-400 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                className="group w-full sm:flex-1 max-w-xs px-8 py-4 border-2 border-amber-300 text-amber-700 rounded-xl font-bold text-lg hover:bg-amber-50 hover:border-amber-400 transition-all duration-200 transform hover:scale-105 active:scale-95"
               >
                 <span className="mr-2 group-hover:scale-110 transition-transform duration-200">❌</span>
                 Cancel
@@ -590,7 +677,7 @@ const ArtworkForm = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group flex-1 max-w-xs bg-gradient-to-r from-amber-600 to-red-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-amber-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                className="group w-full sm:flex-1 max-w-xs bg-gradient-to-r from-amber-600 to-red-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-amber-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
               >
                 <span className="mr-2 group-hover:scale-110 transition-transform duration-200">
                   {isSubmitting ? '⏳' : (isEditing ? '✏️' : '🚀')}
@@ -611,7 +698,9 @@ const ArtworkForm = ({
           onClose={() => setBadgeNotification(null)}
         />
       )}
-    </div>
+      </div>
+    </div>,
+    modalRoot
   );
 };
 

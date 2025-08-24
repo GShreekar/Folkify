@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser, getCurrentUserData } from '../firebase/auth';
+import { loginUser } from '../firebase/auth';
 import { useAuth } from '../contexts/AuthContext';
 import './FolkArtAnimations.css';
 

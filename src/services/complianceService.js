@@ -460,7 +460,7 @@ export const getComplianceStats = async () => {
   }
 };
 
-export default {
+const complianceService = {
   getComplianceData,
   updateComplianceData,
   uploadComplianceDocument,
@@ -470,3 +470,5 @@ export default {
   reviewCompliance,
   getComplianceStats
 };
+
+export default complianceService;

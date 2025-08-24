@@ -33,10 +33,6 @@ const Dashboard = () => {
     }
   }, [currentUser, userData]);
 
-  const handleArtistUpdate = (updatedArtist) => {
-    console.log('Artist updated:', updatedArtist);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen folk-art-background flex items-center justify-center">
@@ -96,16 +92,16 @@ const Dashboard = () => {
       
       <DashboardNavigation />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <WelcomeBanner />
 
         {/* Dashboard Tabs */}
-        <div className="bg-white rounded-xl shadow-lg border-2 border-amber-200 mb-8">
+        <div className="bg-white rounded-xl shadow-lg border-2 border-amber-200 mb-6 sm:mb-8">
           <div className="border-b border-amber-200">
-            <nav className="flex space-x-8 px-6" aria-label="Tabs">
+            <nav className="flex overflow-x-auto px-4 sm:px-6" aria-label="Tabs">
               <button
                 onClick={() => setActiveTab('artworks')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap mr-6 sm:mr-8 ${
                   activeTab === 'artworks'
                     ? 'border-amber-600 text-amber-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -115,7 +111,7 @@ const Dashboard = () => {
               </button>
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap mr-6 sm:mr-8 ${
                   activeTab === 'overview'
                     ? 'border-amber-600 text-amber-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -125,7 +121,7 @@ const Dashboard = () => {
               </button>
               <button
                 onClick={() => setActiveTab('sales')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap mr-6 sm:mr-8 ${
                   activeTab === 'sales'
                     ? 'border-amber-600 text-amber-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -135,7 +131,7 @@ const Dashboard = () => {
               </button>
               <button
                 onClick={() => setActiveTab('compliance')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap ${
                   activeTab === 'compliance'
                     ? 'border-amber-600 text-amber-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -146,9 +142,9 @@ const Dashboard = () => {
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {activeTab === 'overview' && (
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8">
                 <ArtistProfileOverview />
               </div>
             )}

@@ -306,20 +306,16 @@ const MyArtworksSection = () => {
       )}
 
       {/* Artwork Form */}
-      {showArtworkForm && (
-        <div className="mt-10 mb-4">
-          <ArtworkForm
-            key="artwork-form"
-            isOpen={showArtworkForm}
-            onClose={() => {
-              setShowArtworkForm(false);
-              setEditingArtwork(null);
-            }}
-            artwork={editingArtwork}
-            onSuccess={handleArtworkSuccess}
-          />
-        </div>
-      )}
+      <ArtworkForm
+        key="artwork-form"
+        isOpen={showArtworkForm}
+        onClose={() => {
+          setShowArtworkForm(false);
+          setEditingArtwork(null);
+        }}
+        artwork={editingArtwork}
+        onSuccess={handleArtworkSuccess}
+      />
 
       {/* Other Modals */}
       <ArtworkDetailsModal
