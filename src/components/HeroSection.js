@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './FolkArtAnimations.css';
 
 // Component for the folk art slideshow
@@ -84,6 +85,8 @@ const FolkArtSlideshow = () => {
 
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const { currentUser, userData } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsVisible(true);
@@ -93,6 +96,21 @@ const HeroSection = () => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleBecomeArtist = () => {
+    if (currentUser) {
+      if (userData?.role === 'artist') {
+        // Artist is already logged in, go to dashboard
+        navigate('/dashboard');
+      } else {
+        // User is logged in but not as artist, go to artist registration
+        navigate('/register');
+      }
+    } else {
+      // Not logged in, go to artist login
+      navigate('/login');
     }
   };
 
@@ -232,14 +250,16 @@ const HeroSection = () => {
                   👨‍🎨 Meet Artists
                 </span>
               </button>
-              <Link
-                to="/register"
-                className="border-2 border-red-600 text-red-700 px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold hover:bg-red-600 hover:text-white transform hover:scale-105 transition-all duration-200 relative overflow-hidden group inline-flex items-center justify-center min-w-0"
-              >
-                <span className="relative z-10 flex items-center justify-center">
-                  ✨ Become an Artist
-                </span>
-              </Link>
+              {(!currentUser || userData?.role !== 'artist') && (
+                <button
+                  onClick={handleBecomeArtist}
+                  className="border-2 border-red-600 text-red-700 px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-semibold hover:bg-red-600 hover:text-white transform hover:scale-105 transition-all duration-200 relative overflow-hidden group inline-flex items-center justify-center min-w-0"
+                >
+                  <span className="relative z-10 flex items-center justify-center">
+                    ✨ Become an Artist
+                  </span>
+                </button>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-4 lg:gap-8 pt-6 lg:pt-8">

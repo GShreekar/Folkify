@@ -1,4 +1,4 @@
-import { collection, addDoc, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, orderBy, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 export const createPurchase = async (artworkId, buyerData, artworkData) => {
@@ -6,10 +6,12 @@ export const createPurchase = async (artworkId, buyerData, artworkData) => {
     const purchasesRef = collection(db, 'purchases');
     const purchaseDoc = await addDoc(purchasesRef, {
       artworkId,
-      artworkTitle: artworkData.title,
-      artworkPrice: artworkData.price,
+      artworkTitle: artworkData.title || 'Untitled Artwork',
+      artworkPrice: artworkData.price || 0,
       artworkCurrency: artworkData.currency || 'INR',
-      artistId: artworkData.artistId,
+      artForm: artworkData.artForm || 'Unknown',
+      artistId: artworkData.artistId || '',
+      artistName: artworkData.artistName || 'Unknown Artist',
       buyerId: buyerData.userId,
       buyerName: buyerData.name,
       buyerEmail: buyerData.email,
@@ -41,12 +43,59 @@ export const getUserPurchases = async (userId) => {
     const querySnapshot = await getDocs(q);
     const purchases = [];
     
-    querySnapshot.forEach((doc) => {
-      purchases.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
+    // Fetch purchases with artwork details
+    for (const docSnapshot of querySnapshot.docs) {
+      const purchaseData = { id: docSnapshot.id, ...docSnapshot.data() };
+      
+      // Fetch artwork details if artworkId exists
+      if (purchaseData.artworkId) {
+        try {
+          const artworkRef = doc(db, 'artworks', purchaseData.artworkId);
+          const artworkSnapshot = await getDoc(artworkRef);
+          
+          if (artworkSnapshot.exists()) {
+            purchaseData.artwork = {
+              id: artworkSnapshot.id,
+              ...artworkSnapshot.data()
+            };
+          } else {
+            // If artwork is deleted, use stored purchase data
+            purchaseData.artwork = {
+              title: purchaseData.artworkTitle,
+              price: purchaseData.artworkPrice,
+              currency: purchaseData.artworkCurrency,
+              artistName: purchaseData.artistName || 'Unknown Artist',
+              artForm: purchaseData.artForm || 'N/A'
+            };
+          }
+        } catch (error) {
+          console.warn('Error fetching artwork details:', error);
+          // Fallback to stored purchase data
+          purchaseData.artwork = {
+            title: purchaseData.artworkTitle,
+            price: purchaseData.artworkPrice,
+            currency: purchaseData.artworkCurrency,
+            artistName: purchaseData.artistName || 'Unknown Artist',
+            artForm: purchaseData.artForm || 'N/A'
+          };
+        }
+      }
+      
+      // Structure buyer info
+      purchaseData.buyerInfo = {
+        name: purchaseData.buyerName,
+        email: purchaseData.buyerEmail,
+        phone: purchaseData.buyerPhone,
+        address: purchaseData.buyerAddress,
+        notes: purchaseData.notes
+      };
+      
+      // Set purchase date
+      purchaseData.purchaseDate = purchaseData.createdAt;
+      purchaseData.orderId = purchaseData.id;
+      
+      purchases.push(purchaseData);
+    }
     
     return { success: true, purchases };
   } catch (error) {

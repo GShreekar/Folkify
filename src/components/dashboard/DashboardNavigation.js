@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logoutUser } from '../../firebase/auth';
 
-const DashboardNavigation = () => {
+const DashboardNavigation = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -18,12 +18,32 @@ const DashboardNavigation = () => {
 
   const scrollToArtworks = (e) => {
     e.preventDefault();
-    const artworksSection = document.getElementById('my-artworks-section');
-    if (artworksSection) {
-      artworksSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
+    
+    // First, switch to artworks tab if not already there
+    if (setActiveTab && activeTab !== 'artworks') {
+      setActiveTab('artworks');
+      
+      // Longer delay when switching tabs to ensure content is rendered
+      setTimeout(() => {
+        const artworksSection = document.getElementById('my-artworks-section');
+        if (artworksSection) {
+          artworksSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 200);
+    } else {
+      // Already on artworks tab, just scroll
+      setTimeout(() => {
+        const artworksSection = document.getElementById('my-artworks-section');
+        if (artworksSection) {
+          artworksSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 50);
     }
   };
 
@@ -51,6 +71,12 @@ const DashboardNavigation = () => {
               >
                 My Artworks
               </button>
+              <Link 
+                to="/my-purchases" 
+                className="text-amber-800 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 hover:border-b-2 hover:border-amber-600"
+              >
+                My Purchases
+              </Link>
             </div>
           </div>
 

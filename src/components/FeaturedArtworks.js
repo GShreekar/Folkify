@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllArtworks } from '../services/artworkService';
+import { getArtistProfile } from '../services/artistService';
 import { getArtFormColor } from '../constants/artForms';
 import LoadingSpinner from './LoadingSpinner';
 import './FolkArtAnimations.css';
@@ -25,7 +26,26 @@ const FeaturedArtworks = () => {
       });
       
       if (result.success) {
-        setArtworks(result.artworks);
+        // Fetch artist information for each artwork
+        const artworksWithArtists = await Promise.all(
+          result.artworks.map(async (artwork) => {
+            try {
+              const artistResult = await getArtistProfile(artwork.artistId);
+              return {
+                ...artwork,
+                artistName: artistResult.success ? (artistResult.artist.fullName || 'Unknown Artist') : 'Unknown Artist'
+              };
+            } catch (error) {
+              console.error(`Error fetching artist for artwork ${artwork.id}:`, error);
+              return {
+                ...artwork,
+                artistName: 'Unknown Artist'
+              };
+            }
+          })
+        );
+        
+        setArtworks(artworksWithArtists);
       } else {
         setError(result.error || 'Failed to load artworks');
       }
@@ -307,6 +327,10 @@ const FeaturedArtworks = () => {
                   <h3 className="text-lg sm:text-xl font-bold text-amber-900 mb-1">
                     {artwork.title}
                   </h3>
+
+                  <p className="text-amber-600 font-medium mb-2 text-sm sm:text-base">
+                    by {artwork.artistName}
+                  </p>
 
                   <p className="text-amber-700 font-medium mb-3 text-sm sm:text-base">
                     {artwork.yearCreated && `Created in ${artwork.yearCreated}`}

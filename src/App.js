@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ArtistRoute from './components/ArtistRoute';
 import PublicRoute from './components/PublicRoute';
 import ScrollToTop from './components/ScrollToTop';
 import HomePage from './components/HomePage';
@@ -17,6 +18,7 @@ import BadgeSystem from './components/BadgeSystem';
 import ExportComplianceChecklist from './components/ExportComplianceChecklist';
 import ComplianceForm from './components/ComplianceForm';
 import PurchaseHistory from './components/PurchaseHistory';
+import MyPurchases from './components/MyPurchases';
 import './App.css';
 
 function App() {
@@ -62,17 +64,25 @@ function App() {
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
+                <ArtistRoute>
                   <Dashboard />
+                </ArtistRoute>
+              } 
+            />
+            <Route 
+              path="/my-purchases" 
+              element={
+                <ProtectedRoute>
+                  <MyPurchases />
                 </ProtectedRoute>
               } 
             />
             <Route 
               path="/purchase-history" 
               element={
-                <ProtectedRoute>
+                <ArtistRoute>
                   <PurchaseHistory />
-                </ProtectedRoute>
+                </ArtistRoute>
               } 
             />
             <Route path="/gallery" element={<Gallery />} />
@@ -83,9 +93,9 @@ function App() {
             <Route 
               path="/compliance" 
               element={
-                <ProtectedRoute>
+                <ArtistRoute>
                   <ComplianceForm />
-                </ProtectedRoute>
+                </ArtistRoute>
               } 
             />
           </Routes>

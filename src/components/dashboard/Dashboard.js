@@ -13,7 +13,7 @@ const Dashboard = () => {
   const { currentUser, userData } = useAuth();
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('artworks');
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -90,7 +90,7 @@ const Dashboard = () => {
       <div className="geometric-pattern geo-2"></div>
       <div className="geometric-pattern geo-3"></div>
       
-      <DashboardNavigation />
+      <DashboardNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <WelcomeBanner />
@@ -100,16 +100,6 @@ const Dashboard = () => {
           <div className="border-b border-amber-200">
             <nav className="flex overflow-x-auto px-4 sm:px-6" aria-label="Tabs">
               <button
-                onClick={() => setActiveTab('artworks')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap mr-6 sm:mr-8 ${
-                  activeTab === 'artworks'
-                    ? 'border-amber-600 text-amber-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                My Artworks
-              </button>
-              <button
                 onClick={() => setActiveTab('overview')}
                 className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap mr-6 sm:mr-8 ${
                   activeTab === 'overview'
@@ -118,6 +108,16 @@ const Dashboard = () => {
                 }`}
               >
                 Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('artworks')}
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap mr-6 sm:mr-8 ${
+                  activeTab === 'artworks'
+                    ? 'border-amber-600 text-amber-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                My Artworks
               </button>
               <button
                 onClick={() => setActiveTab('sales')}

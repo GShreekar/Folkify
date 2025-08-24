@@ -9,6 +9,9 @@ const ArtworkModal = ({ artwork, onClose }) => {
 
   if (!artwork) return null;
 
+  // Check if current user is the owner of this artwork
+  const isArtworkOwner = currentUser && artwork && currentUser.uid === artwork.artistId;
+
   const handlePurchaseSuccess = (purchaseId) => {
     setPurchaseSuccess(true);
     console.log('Purchase created successfully:', purchaseId);
@@ -151,27 +154,18 @@ const ArtworkModal = ({ artwork, onClose }) => {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                {artwork.isForSale && currentUser && (
+                {/* Buy Button - Show only when logged in, not loading, and not the artwork owner */}
+                {artwork.isForSale && !loading && currentUser && !isArtworkOwner && (
                   <button 
                     onClick={() => setShowPurchaseModal(true)}
                     className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200"
                   >
-                    Buy Artwork
+                    Buy Artwork - {formatPrice(artwork.price)}
                   </button>
                 )}
 
-                                {/* Buy Now Button - Show only when logged in and not loading */}
-                {artwork.isForSale && !loading && currentUser && (
-                  <button
-                    onClick={() => setShowPurchaseModal(true)}
-                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  >
-                    Buy Now - {formatPrice(artwork.price)}
-                  </button>
-                )}
-
-                {/* Login prompt - Show only when not loading and not logged in */}
-                {artwork.isForSale && !loading && !currentUser && (
+                {/* Login prompt - Show only when not loading, not logged in, and not the artwork owner */}
+                {artwork.isForSale && !loading && !currentUser && !isArtworkOwner && (
                   <div className="w-full">
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
                       <p className="text-amber-800 text-sm text-center">
@@ -194,14 +188,25 @@ const ArtworkModal = ({ artwork, onClose }) => {
                   </div>
                 )}
 
-                {/* Loading state - Show loading button while auth is being determined */}
-                {artwork.isForSale && loading && (
+                {/* Loading state - Show loading button while auth is being determined and not the artwork owner */}
+                {artwork.isForSale && loading && !isArtworkOwner && (
                   <button 
                     disabled
                     className="w-full bg-gray-300 text-gray-500 py-3 px-6 rounded-xl font-semibold cursor-not-allowed"
                   >
                     Loading...
                   </button>
+                )}
+
+                {/* Owner message - Show when the current user is the artwork owner */}
+                {isArtworkOwner && artwork.isForSale && (
+                  <div className="w-full text-center py-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <p className="text-blue-600 text-sm font-medium">
+                        This is your artwork
+                      </p>
+                    </div>
+                  </div>
                 )}
 
                 {!artwork.isForSale && (

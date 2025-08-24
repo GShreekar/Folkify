@@ -7,6 +7,7 @@ import VerifiedArtistBadge from './VerifiedArtistBadge';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import PurchaseModal from './artwork/PurchaseModal';
+import ArtworkForm from './artwork/ArtworkForm';
 import './FolkArtAnimations.css';
 
 const ArtworkDetail = () => {
@@ -17,12 +18,34 @@ const ArtworkDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showArtworkForm, setShowArtworkForm] = useState(false);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+
+  // Check if current user is the owner of this artwork
+  const isArtworkOwner = currentUser && artwork && currentUser.uid === artwork.artistId;
 
   const handlePurchaseSuccess = (purchaseId) => {
     setPurchaseSuccess(true);
     console.log('Purchase created successfully:', purchaseId);
     // You could add a toast notification here
+  };
+
+  const handleArtworkFormSuccess = async () => {
+    // Reload the artwork data to show updated information
+    try {
+      const artworkResult = await getArtwork(artworkId);
+      if (artworkResult.success) {
+        setArtwork(artworkResult.artwork);
+      }
+    } catch (error) {
+      console.error('Error reloading artwork:', error);
+    }
+  };
+
+  const handleArtworkFormClose = () => {
+    setShowArtworkForm(false);
+    // Always reload when form closes to ensure we have latest data
+    handleArtworkFormSuccess();
   };
 
   useEffect(() => {
@@ -270,8 +293,8 @@ const ArtworkDetail = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                {/* Buy Button - Show only when logged in and not loading */}
-                {artwork.isForSale && !authLoading && currentUser && (
+                {/* Buy Button - Show only when logged in, not loading, and not the artwork owner */}
+                {artwork.isForSale && !authLoading && currentUser && !isArtworkOwner && (
                   <button 
                     onClick={() => setShowPurchaseModal(true)}
                     className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200"
@@ -280,8 +303,8 @@ const ArtworkDetail = () => {
                   </button>
                 )}
 
-                {/* Login prompt - Show only when not loading and not logged in */}
-                {artwork.isForSale && !authLoading && !currentUser && (
+                {/* Login prompt - Show only when not loading, not logged in, and not the artwork owner */}
+                {artwork.isForSale && !authLoading && !currentUser && !isArtworkOwner && (
                   <div className="flex-1">
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
                       <p className="text-amber-800 text-sm text-center">
@@ -304,13 +327,34 @@ const ArtworkDetail = () => {
                   </div>
                 )}
 
-                {/* Loading state - Show loading button while auth is being determined */}
-                {artwork.isForSale && authLoading && (
+                {/* Loading state - Show loading button while auth is being determined and not the artwork owner */}
+                {artwork.isForSale && authLoading && !isArtworkOwner && (
                   <button 
                     disabled
                     className="flex-1 bg-gray-300 text-gray-500 py-3 px-6 rounded-xl font-semibold cursor-not-allowed"
                   >
                     Loading...
+                  </button>
+                )}
+
+                {/* Owner message - Show when the current user is the artwork owner */}
+                {isArtworkOwner && artwork.isForSale && (
+                  <div className="flex-1 text-center py-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <p className="text-blue-600 text-sm font-medium">
+                        This is your artwork
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Edit Artwork button for artwork owner */}
+                {isArtworkOwner && (
+                  <button 
+                    onClick={() => setShowArtworkForm(true)}
+                    className="flex-1 bg-gradient-to-r from-amber-600 to-red-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200"
+                  >
+                    ✏️ Edit Artwork
                   </button>
                 )}
 
@@ -324,7 +368,8 @@ const ArtworkDetail = () => {
                   </div>
                 )}
                 
-                {artist && (
+                {/* View Artist Profile - Hide when user is viewing their own artwork */}
+                {artist && !isArtworkOwner && (
                   <button 
                     onClick={() => window.location.href = `/artist/${artist.id}`}
                     className="flex-1 border-2 border-amber-600 text-amber-700 py-3 px-6 rounded-xl font-semibold hover:bg-amber-600 hover:text-white transform hover:scale-105 transition-all duration-200"
@@ -356,9 +401,21 @@ const ArtworkDetail = () => {
       {/* Purchase Modal */}
       {showPurchaseModal && (
         <PurchaseModal
-          artwork={artwork}
+          artwork={{
+            ...artwork,
+            artistName: artist?.fullName || 'Unknown Artist'
+          }}
           onClose={() => setShowPurchaseModal(false)}
           onSuccess={handlePurchaseSuccess}
+        />
+      )}
+
+      {/* Artwork Edit Form */}
+      {showArtworkForm && (
+        <ArtworkForm
+          isOpen={showArtworkForm}
+          onClose={handleArtworkFormClose}
+          artwork={artwork}
         />
       )}
 

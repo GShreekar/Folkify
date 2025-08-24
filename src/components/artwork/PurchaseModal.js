@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { createPurchase } from '../../services/purchaseService';
 
 const PurchaseModal = ({ artwork, onClose, onSuccess }) => {
   const { currentUser, userData } = useAuth();
   const [formData, setFormData] = useState({
+    name: '',
     phone: '',
     address: '',
     notes: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+    // Initialize form data with user information
+  useEffect(() => {
+    if (userData) {
+      setFormData(prev => ({
+        ...prev,
+        name: userData.fullName || userData.displayName || userData.name || '',
+        phone: userData.phoneNumber || ''
+      }));
+    }
+  }, [userData]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -31,7 +43,7 @@ const PurchaseModal = ({ artwork, onClose, onSuccess }) => {
 
     const buyerData = {
       userId: currentUser.uid,
-      name: userData.displayName || userData.name || 'Unknown User',
+      name: formData.name,
       email: userData.email || currentUser.email,
       phone: formData.phone,
       address: formData.address,
@@ -107,9 +119,12 @@ const PurchaseModal = ({ artwork, onClose, onSuccess }) => {
                   </label>
                   <input
                     type="text"
-                    value={userData?.displayName || userData?.name || ''}
-                    disabled
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 text-gray-600"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="Enter your full name"
                   />
                 </div>
                 <div>

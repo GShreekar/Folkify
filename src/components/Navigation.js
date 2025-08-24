@@ -109,19 +109,27 @@ const Navigation = () => {
                   Welcome, {userData?.fullName || currentUser.email}
                 </span>
                 {userData?.role === 'artist' && (
-                  <Link 
-                    to="/dashboard" 
-                    className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-3 xl:px-4 py-2 rounded-full text-xs xl:text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
-                  >
-                    Dashboard
-                  </Link>
+                  <>
+                    <Link 
+                      to="/dashboard" 
+                      className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-3 xl:px-4 py-2 rounded-full text-xs xl:text-sm font-medium hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link 
+                      to="/my-purchases" 
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 xl:px-4 py-2 rounded-full text-xs xl:text-sm font-medium hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                      My Purchases
+                    </Link>
+                  </>
                 )}
-                {userData?.role !== 'artist' && (
+                {userData?.role === 'buyer' && (
                   <Link 
-                    to="/purchase-history" 
+                    to="/my-purchases" 
                     className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 xl:px-4 py-2 rounded-full text-xs xl:text-sm font-medium hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
                   >
-                    Purchases
+                    My Purchases
                   </Link>
                 )}
                 <button 
@@ -238,17 +246,26 @@ const Navigation = () => {
                   Welcome, <span className="font-medium">{userData?.fullName || currentUser.email}</span>
                 </div>
                 {userData?.role === 'artist' && (
-                  <Link 
-                    to="/dashboard" 
-                    className="block px-3 py-3 text-amber-900 hover:text-amber-700 hover:bg-amber-100 font-medium transition-all duration-200 rounded-lg"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    📊 Dashboard
-                  </Link>
+                  <>
+                    <Link 
+                      to="/dashboard" 
+                      className="block px-3 py-3 text-amber-900 hover:text-amber-700 hover:bg-amber-100 font-medium transition-all duration-200 rounded-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      📊 Dashboard
+                    </Link>
+                    <Link 
+                      to="/my-purchases" 
+                      className="block px-3 py-3 text-blue-900 hover:text-blue-700 hover:bg-blue-50 font-medium transition-all duration-200 rounded-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      🛍️ My Purchases
+                    </Link>
+                  </>
                 )}
-                {userData?.role !== 'artist' && (
+                {userData?.role === 'buyer' && (
                   <Link 
-                    to="/purchase-history" 
+                    to="/my-purchases" 
                     className="block px-3 py-3 text-blue-900 hover:text-blue-700 hover:bg-blue-50 font-medium transition-all duration-200 rounded-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

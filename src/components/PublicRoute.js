@@ -3,9 +3,19 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const PublicRoute = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, userData, loading } = useAuth();
   
-  return currentUser ? <Navigate to="/dashboard" replace /> : children;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (currentUser && userData) {
+    // Redirect based on user role
+    const redirectPath = userData.role === 'artist' ? '/dashboard' : '/gallery';
+    return <Navigate to={redirectPath} replace />;
+  }
+  
+  return children;
 };
 
 export default PublicRoute;

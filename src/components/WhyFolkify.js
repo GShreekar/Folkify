@@ -1,7 +1,36 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './FolkArtAnimations.css';
 
 const WhyFolkify = () => {
+  const { currentUser, userData } = useAuth();
+  const navigate = useNavigate();
+
+  const handleStartCollecting = () => {
+    if (currentUser) {
+      // User is already logged in, redirect to gallery or homepage
+      navigate('/gallery');
+    } else {
+      // Not logged in, go to user login
+      navigate('/user-login');
+    }
+  };
+
+  const handleBecomeArtist = () => {
+    if (currentUser) {
+      if (userData?.role === 'artist') {
+        // Artist is already logged in, go to dashboard
+        navigate('/dashboard');
+      } else {
+        // User is logged in but not as artist, go to artist registration
+        navigate('/register');
+      }
+    } else {
+      // Not logged in, go to artist login
+      navigate('/login');
+    }
+  };
   const pillars = [
     {
       id: 1,
@@ -146,12 +175,22 @@ const WhyFolkify = () => {
             wanting to share your craft with the world, Folkify is your platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
-              Start Collecting
-            </button>
-            <button className="border-2 border-amber-600 text-amber-700 px-8 py-4 rounded-full text-lg font-semibold hover:bg-amber-600 hover:text-white transform hover:scale-105 transition-all duration-200">
-              Become an Artist
-            </button>
+            {(!currentUser || userData?.role !== 'buyer') && (
+              <button 
+                onClick={handleStartCollecting}
+                className="bg-gradient-to-r from-amber-600 to-red-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Start Collecting
+              </button>
+            )}
+            {(!currentUser || userData?.role !== 'artist') && (
+              <button 
+                onClick={handleBecomeArtist}
+                className="border-2 border-amber-600 text-amber-700 px-8 py-4 rounded-full text-lg font-semibold hover:bg-amber-600 hover:text-white transform hover:scale-105 transition-all duration-200"
+              >
+                Become an Artist
+              </button>
+            )}
           </div>
         </div>
       </div>
