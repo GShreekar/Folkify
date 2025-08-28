@@ -19,9 +19,7 @@ const MeetTheArtists = () => {
   const formatArtistData = (user) => {
     return {
       id: user.id,
-      displayName: user.displayName || user.firstName || user.name || user.email?.split('@')[0] || 'Artist',
-      firstName: user.firstName || user.name || user.displayName,
-      lastName: user.lastName || '',
+      fullName: user.fullName || user.email?.split('@')[0] || 'Artist',
       email: user.email,
       profileImage: user.profileImage || user.photoURL || user.avatar,
       location: user.location || user.city || user.address || 'India',
@@ -53,7 +51,11 @@ const MeetTheArtists = () => {
               artist.role === 'artist' || 
               artist.userType === 'artist' || 
               (!artist.role && !artist.userType) // Legacy artists without role field
-            );
+            )
+            .sort((a, b) => {
+              // Sort by artwork count in descending order (highest first)
+              return (b.artworkCount || 0) - (a.artworkCount || 0);
+            });
           const artistsToShow = formattedArtists.slice(0, 6);
           setArtists(artistsToShow);
         }
@@ -195,7 +197,7 @@ const MeetTheArtists = () => {
                     {artist.profileImage ? (
                       <img
                         src={artist.profileImage}
-                        alt={artist.displayName || artist.firstName || 'Artist'}
+                        alt={artist.fullName || 'Artist'}
                         className="w-full h-full object-cover rounded-full"
                         onError={(e) => {
                           e.target.style.display = 'none';
@@ -214,7 +216,7 @@ const MeetTheArtists = () => {
                   <div>
                     <div className="flex items-center justify-center space-x-2 mb-2">
                       <h3 className="text-xl font-bold text-amber-900">
-                        {artist.displayName || artist.firstName || artist.email?.split('@')[0] || 'Artist'}
+                        {artist.fullName || artist.email?.split('@')[0] || 'Artist'}
                       </h3>
                       {artist.isVerified && (
                         <VerifiedArtistBadge size="xs" />
@@ -239,17 +241,27 @@ const MeetTheArtists = () => {
                     </p>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-200">
-                    <div>
-                      <div className="text-lg font-bold text-amber-900">{artist.artworkCount || 0}</div>
-                      <div className="text-xs text-amber-600">Artworks</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-amber-900 flex items-center justify-center">
-                        {artist.experienceYears || 0}+ 
+                  <div className="relative">
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-200">
+                      <div>
+                        <div className="text-lg font-bold text-amber-900 flex items-center justify-center">
+                          🎨 {artist.artworkCount || 0}
+                        </div>
+                        <div className="text-xs text-amber-600">Artworks</div>
                       </div>
-                      <div className="text-xs text-amber-600">Years</div>
+                      <div>
+                        <div className="text-lg font-bold text-amber-900 flex items-center justify-center">
+                          ⏰ {artist.experienceYears || 0}+ 
+                        </div>
+                        <div className="text-xs text-amber-600">Years</div>
+                      </div>
                     </div>
+                    {/* Highlight for highest artwork count - positioned between the two sections */}
+                    {artists.indexOf(artist) === 0 && artist.artworkCount > 0 && (
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg z-10">
+                        Top
+                      </div>
+                    )}
                   </div>
 
                   <button className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-2 px-4 rounded-xl text-sm font-semibold hover:from-amber-700 hover:to-red-700 transform hover:scale-105 transition-all duration-200 mt-4">

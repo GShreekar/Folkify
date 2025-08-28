@@ -11,7 +11,7 @@ const PublicRoute = ({ children }) => {
   
   if (currentUser && userData) {
     // Redirect based on user role
-    const redirectPath = userData.role === 'artist' ? '/dashboard' : '/gallery';
+    const redirectPath = userData.role === 'artist' ? '/dashboard' : '/';
     return <Navigate to={redirectPath} replace />;
   }
   

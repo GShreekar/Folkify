@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../firebase/auth';
+import { useAuth } from '../contexts/AuthContext';
 import { ART_FORMS } from '../constants/artForms';
 import './FolkArtAnimations.css';
 
@@ -19,7 +20,27 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
   const navigate = useNavigate();
+  const { currentUser, userData } = useAuth();
+
+  // Handle redirect after authentication state is updated
+  useEffect(() => {
+    if (shouldRedirect && currentUser && userData && userData.role === 'artist') {
+      // All conditions met: user is registered, logged in, and userData is loaded
+      navigate('/dashboard');
+      setShouldRedirect(false);
+    } else if (shouldRedirect && currentUser) {
+      // Fallback: if userData is taking too long, redirect after 5 seconds
+      const timer = setTimeout(() => {
+        console.warn('UserData not loaded after 5 seconds, redirecting anyway');
+        navigate('/dashboard');
+        setShouldRedirect(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser, userData, shouldRedirect, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -87,7 +108,8 @@ const Register = () => {
       });
 
       if (result.success) {
-        navigate('/dashboard');
+        // Set flag to redirect once AuthContext updates with userData
+        setShouldRedirect(true);
       } else {
         setErrors({ submit: result.error });
       }
@@ -314,14 +336,14 @@ const Register = () => {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || shouldRedirect}
             className={`w-full font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl ${
-              isLoading 
+              isLoading || shouldRedirect
                 ? 'bg-gray-400 cursor-not-allowed' 
                 : 'bg-gradient-to-r from-amber-600 to-red-600 text-white hover:from-amber-700 hover:to-red-700 transform hover:scale-105'
             }`}
           >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+            {isLoading ? 'Creating Account...' : shouldRedirect ? 'Logging in...' : 'Create Account'}
           </button>
         </form>
 

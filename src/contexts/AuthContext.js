@@ -26,6 +26,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
 
+  const loadUserDataWithRetry = async (uid, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const result = await getCurrentUserData(uid);
+        if (result.success) {
+          return result;
+        } else if (i < retries - 1) {
+          // Wait a bit before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+      } catch (error) {
+        if (i < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+      }
+    }
+    return { success: false, error: 'Failed to load user data after multiple attempts' };
+  };
+
   const loadUserArtworks = async (uid) => {
     try {
       const artworksResult = await getUserArtworks(uid);
@@ -87,12 +106,19 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(user);
       
       if (user) {
-        const result = await getCurrentUserData(user.uid);
-        if (result.success) {
-          setUserData(result.userData);
+        try {
+          const result = await loadUserDataWithRetry(user.uid);
+          if (result.success) {
+            setUserData(result.userData);
+            await loadUserArtworks(user.uid);
+          } else {
+            console.error('Error loading user data:', result.error);
+            setUserData(null);
+          }
+        } catch (error) {
+          console.error('Error in auth state change:', error);
+          setUserData(null);
         }
-        
-        await loadUserArtworks(user.uid);
       } else {
         setUserData(null);
         setUserArtworks([]);

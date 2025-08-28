@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerBuyerUser } from '../firebase/auth';
+import { useAuth } from '../contexts/AuthContext';
 import './FolkArtAnimations.css';
 
 const UserRegister = () => {
@@ -15,7 +16,27 @@ const UserRegister = () => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
   const navigate = useNavigate();
+  const { currentUser, userData } = useAuth();
+
+  // Handle redirect after authentication state is updated
+  useEffect(() => {
+    if (shouldRedirect && currentUser && userData && userData.role === 'buyer') {
+      // All conditions met: user is registered, logged in, and userData is loaded
+      navigate('/');
+      setShouldRedirect(false);
+    } else if (shouldRedirect && currentUser) {
+      // Fallback: if userData is taking too long, redirect after 5 seconds
+      const timer = setTimeout(() => {
+        console.warn('UserData not loaded after 5 seconds, redirecting anyway');
+        navigate('/');
+        setShouldRedirect(false);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser, userData, shouldRedirect, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -77,7 +98,8 @@ const UserRegister = () => {
       });
 
       if (result.success) {
-        navigate('/');
+        // Set flag to redirect once AuthContext updates with userData
+        setShouldRedirect(true);
       } else {
         setErrors({ submit: result.error });
       }
@@ -242,10 +264,10 @@ const UserRegister = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || shouldRedirect}
               className="w-full bg-gradient-to-r from-amber-600 to-red-600 text-white py-3 px-4 rounded-xl font-medium hover:from-amber-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? 'Creating Account...' : shouldRedirect ? 'Logging in...' : 'Create Account'}
             </button>
           </form>
 
